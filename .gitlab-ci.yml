@@ -1,0 +1,32 @@
+stages:
+  - build
+
+variables:
+  IMAGE_NAME: dm-tool-be
+  TAG_LATEST: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+  TAG_COMMIT: $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+  DOCKER_TLS_CERTDIR: ""
+
+docker:
+  image: docker:stable
+  stage: build
+  only:
+    - production
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache python3 py3-pip
+    - pip3 install --no-cache-dir awscli
+  script:
+    - aws ecr get-login-password --region $AWS_REGION |
+      docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+    - echo "$PRODUCTION_ENV" > .env
+    - docker pull $TAG_LATEST || true
+    - docker build --cache-from $TAG_LATEST -t $TAG_COMMIT -t $TAG_LATEST .
+    - docker push $TAG_COMMIT
+    - docker push $TAG_LATEST
+    - mkdir -p ~/.ssh
+    - ssh-keyscan -H "$PRODUCTION_HOST" >> ~/.ssh/known_hosts
+    - echo "$PRODUCTION_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh -t -t $SSH_USER_HOST -p 2345 -o StrictHostKeyChecking=no $SSH_SCRIPT

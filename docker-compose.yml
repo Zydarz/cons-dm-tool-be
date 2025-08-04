@@ -1,0 +1,33 @@
+version: '3.3'
+services:
+  api:
+    env_file:
+      - .env
+    container_name: ads-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - ads-app
+    ports:
+      - $PORT:${PORT:-3000}
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    restart: always
+  mysql:
+    image: mysql:5.7
+    networks:
+      - ads-app
+    environment:
+      - MYSQL_ROOT_PASSWORD=secret
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=${DB_PASSWORD:-secret}
+      - MYSQL_DATABASE=${DB_DATABASE:-ads}
+    container_name: mysql
+    ports:
+      - $DATABASE_EXPOSE_PORT:3306
+    restart: always
+networks:
+  ads-app:
+    driver: bridge
