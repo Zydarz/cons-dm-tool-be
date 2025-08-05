@@ -982,9 +982,9 @@ export class ResourceRepository implements ResourceNS.IResourceRepository {
       where: {
         userProjectId: id,
       },
+      group: ['positionId'], // Thêm dòng này
     });
   }
-
   async getProjectRankMember(
     positionId: number,
     userId: string,

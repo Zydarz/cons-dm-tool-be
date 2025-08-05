@@ -126,8 +126,6 @@ export class ProjectsController {
     @Query(new ValidationPipe({ transform: true }))
     dto: GetAllResourceSummaryDto,
   ): Promise<ResourceSummaryMonth[]> {
-console.log('11111111');
-
     return await this.projectService.getAllResourceSummaries(dto.projectId);
   }
 
@@ -285,6 +283,7 @@ console.log('11111111');
   @HttpCode(HttpStatus.CREATED)
   @Auth(UserNS.ALL)
   async createPayment(@Body() params: CreatePaymentDto, @AuthUser() user: UserEntity): Promise<PaymentDto> {
+    console.log(11111);
     return await this.paymentTrackingService.createPayment(params, user);
   }
 

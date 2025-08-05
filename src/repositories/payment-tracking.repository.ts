@@ -162,8 +162,8 @@ export class PaymentTrackingRepository implements PaymentNS.IPaymentTrackingRepo
     
     
     const array = payment.map((p) => ({
-      month: p.getDataValue(PaymentNS.Type.MONTH),
-      year: p.getDataValue(PaymentNS.Type.YEAR),
+      month: p[PaymentNS.Type.MONTH],  // Truy cập trực tiếp property
+      year: p[PaymentNS.Type.YEAR],    // Truy cập trực tiếp property
     }));
     return array;
   }

@@ -224,16 +224,17 @@ export class UserProjectRepository implements UserProjectNS.IUserProjectReposito
 
     return new SuccessResponseDto(true);
   }
+
   async getUserInMonth(filterOptions: FilterUserSummaryDto): Promise<UserProjectEntity[]> {
-    const startDate = moment(new Date(filterOptions.month)).startOf('month').toDate();
-    const endDate = moment(new Date(filterOptions.month)).endOf('month').toDate();
     const condition = {};
+    
     if (filterOptions.lineId) {
       const lineIds = filterOptions.lineId.split(',');
       Object.assign(condition, {
         lineId: { [Op.in]: lineIds },
       });
     }
+    
     if (filterOptions.status && [STATUS_ACTIVE, STATUS_INACTIVE].includes(filterOptions.status)) {
       Object.assign(condition, {
         status: filterOptions.status,
@@ -243,34 +244,59 @@ export class UserProjectRepository implements UserProjectNS.IUserProjectReposito
         status: { [Op.in]: [STATUS_ACTIVE, STATUS_INACTIVE] },
       });
     }
-
+  
     if (!isNil(filterOptions.divisionIds) && filterOptions.divisionIds.length > 0) {
       Object.assign(condition, {
         departmentId: { [Op.in]: filterOptions.divisionIds },
       });
     }
-    let include = {} as any;
-    include = [
+    
+    let include: any[] = [
       {
         model: UserEntity,
         as: 'users',
+        attributes: [],
         where: condition,
       },
-      {
+    ];
+  
+    // Cast về any để tránh TypeScript error
+    const monthValue = filterOptions.month as any;
+    if (monthValue && monthValue !== -1 && monthValue !== '-1') {
+      const startDate = moment(new Date(filterOptions.month)).startOf('month').toDate();
+      const endDate = moment(new Date(filterOptions.month)).endOf('month').toDate();
+      
+      // Kiểm tra xem date có hợp lệ không
+      if (moment(startDate).isValid() && moment(endDate).isValid()) {
+        include.push({
+          model: ResourceEntity,
+          as: 'resources',
+          attributes: [],
+          where: {
+            date: { [Op.between]: [startDate, endDate] },
+          },
+        });
+      }
+    } else {
+      // Nếu không có month filter, vẫn include ResourceEntity nhưng không có where condition
+      include.push({
         model: ResourceEntity,
         as: 'resources',
-        where: {
-          date: { [Op.between]: [startDate, endDate] },
-        },
-      },
-    ];
-    if (!isNil(filterOptions.projectDepartmentIds) && filterOptions.projectDepartmentIds.length > 0) {
-      Object.assign(include, {
-        model: ProjectEntity,
-        as: 'projects',
-        departmentId: { [Op.in]: filterOptions.projectDepartmentIds },
+        attributes: [],
       });
     }
+    
+    if (!isNil(filterOptions.projectDepartmentIds) && filterOptions.projectDepartmentIds.length > 0) {
+      include.push({
+        model: ProjectEntity,
+        as: 'projects',
+        attributes: [],
+        where: {
+          departmentId: { [Op.in]: filterOptions.projectDepartmentIds },
+        },
+      });
+    }
+    
     return await this.userProjectEntity.findAll({
       attributes: ['userId'],
       include: include,
@@ -278,4 +304,5 @@ export class UserProjectRepository implements UserProjectNS.IUserProjectReposito
       raw: true
     });
   }
+  
 }
