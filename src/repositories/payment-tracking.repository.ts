@@ -167,6 +167,7 @@ export class PaymentTrackingRepository implements PaymentNS.IPaymentTrackingRepo
     }));
     return array;
   }
+  
   async getArrayFilterSummaryGraphic(
     filter: PaymentSummaryFilterDto,
     condition: any,
@@ -176,6 +177,7 @@ export class PaymentTrackingRepository implements PaymentNS.IPaymentTrackingRepo
     const includes = this.generateQuery(conditionRelation, user);
     const { groupBy } = filter;
     let group;
+    
     if (groupBy === GroupBy.PROJECT) {
       group = [PaymentNS.Type.PROJECTID, PaymentNS.Type.MONTH, PaymentNS.Type.YEAR];
       const payment = await this.paymentEntity.findAll({
@@ -192,6 +194,7 @@ export class PaymentTrackingRepository implements PaymentNS.IPaymentTrackingRepo
       });
       return payment;
     }
+    
     group = [PaymentNS.Type.MONTH, PaymentNS.Type.YEAR];
     const payment = await this.paymentEntity.findAll({
       where: condition,
@@ -211,13 +214,15 @@ export class PaymentTrackingRepository implements PaymentNS.IPaymentTrackingRepo
       raw: true,
     });
     
-    
+    // Fix: Truy cập trực tiếp properties thay vì dùng getDataValue()
     const array = payment.map((p) => ({
-      month: p.getDataValue(PaymentNS.Type.MONTH),
-      year: p.getDataValue(PaymentNS.Type.YEAR),
+      month: p[PaymentNS.Type.MONTH],
+      year: p[PaymentNS.Type.YEAR],
     }));
+    
     return array;
   }
+
   async getPaymentSummary(condition: any, conditionRelation: any, user: UserEntity): Promise<PaymentEntity[]> {
     const includes = this.generateQuery(conditionRelation, user);
     const payment = await this.paymentEntity.findAll({
