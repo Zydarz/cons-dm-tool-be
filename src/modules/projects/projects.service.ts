@@ -39,6 +39,7 @@ import { UserProjectDto } from '../../modules/user-projects/dto/responses/user-p
 import { PaymentNS } from '../../modules/payment-tracking/interfaces/payment-tracking';
 import { MasterDataNS } from '../../modules/master-data/master-data';
 import { Util } from '../../common/util';
+import { TimeSheetProjectDto } from './dto/responses/timesheet-project-dto';
 @Injectable()
 export class ProjectsService implements ProjectNS.IProjectService {
   constructor(
@@ -85,7 +86,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
 
     @Inject(Sequelize.name)
     private readonly sequelize: Sequelize,
-  ) {}
+  ) { }
 
   private async sumActualByProject(id: number): Promise<number> {
     let sum = +0;
@@ -191,6 +192,25 @@ export class ProjectsService implements ProjectNS.IProjectService {
     const projects = await this.getProjectOfUser(user.id);
     resourceProjectFilterDto.projectIds = projects.map((p) => p.id).join(',');
     return await this.projectRepository.getProjectResource(resourceProjectFilterDto);
+  }
+
+  async getProjectAndMemberForTimesheets(
+    user: UserEntity,
+  ): Promise<TimeSheetProjectDto> {
+
+    console.log('2222222222222');
+    const projects = await this.projectRepository.getProjectByUserId(user.id);
+
+
+console.log('projects',projects);
+
+    // Tạo một đối tượng TimeSheetProjectDto. 
+    // Nếu 'data' là mảng rỗng hoặc null, thì 'projects' cũng sẽ là mảng rỗng.
+    const timesheet: TimeSheetProjectDto = {
+      projects: projects || [], // Dùng || [] để đảm bảo 'projects' luôn là một mảng
+    };
+
+    return timesheet;
   }
 
   async createProject(createProjectDto: CreateProjectDto): Promise<ProjectDto> {
@@ -382,6 +402,10 @@ export class ProjectsService implements ProjectNS.IProjectService {
     return await this.logWorkService.getLogWork(projectId, logWorkFilterOptionsDto);
   }
 
+  async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
+    return await this.logWorkService.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
+  }
+
   async getDetailLogWork(logWorkId: number): Promise<LogWorkDto> {
     return await this.logWorkService.getDetailLogWork(logWorkId);
   }
@@ -475,9 +499,6 @@ export class ProjectsService implements ProjectNS.IProjectService {
   }
 
   async getAllResourceSummaries(projectId: number): Promise<ResourceSummaryMonth[]> {
-
-    console.log('22222222');
-
     const rsObj: Record<string, ResourceSummaryMonth> = {};
     const result: ResourceSummaryMonth[] = [];
     const resourceSummaries = await this.resourceSummaryService.getAllMonth(projectId);
@@ -614,7 +635,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
     const userIds: string[] = [];
     resourceProjectFilterDto.projectIds = projectId;
     const projectResources = await this.resourceService.getListProjectResource(resourceProjectFilterDto, user);
-    if(!isNil(projectResources)) {
+    if (!isNil(projectResources)) {
       projectResources.forEach((project: any) => {
         departmentId = project?.departmentId;
         project?.allocates?.forEach((item: any) => {
@@ -624,7 +645,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
               const tMonth = moment(node.startDate).format('MM');
               const tYear = moment(node.startDate).format('YYYY');
               userIds.push(item.id);
-              if(!result.hasOwnProperty(item.id)) {
+              if (!result.hasOwnProperty(item.id)) {
                 result[item.id] = {
                   [thisMonth]: {
                     ac: node.ac,
@@ -633,7 +654,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
                   }
                 };
               }
-              else if(!result?.[item.id].hasOwnProperty(thisMonth)) {
+              else if (!result?.[item.id].hasOwnProperty(thisMonth)) {
                 result[item.id][thisMonth] = {
                   ac: node.ac,
                   month: tMonth,
@@ -649,31 +670,31 @@ export class ProjectsService implements ProjectNS.IProjectService {
       });
     }
     const salaries: {
-      [userMonth: string]:  number;
+      [userMonth: string]: number;
     } = {};
 
     const userSalaries = await this.userSalaryRepository.getSalaryByUser({ userIds: userIds, departmentId: String(departmentId), startDate: resourceProjectFilterDto.startDate, endDate: resourceProjectFilterDto.endDate });
-    if(!isNil(userSalaries) && isObject(userSalaries)) {
+    if (!isNil(userSalaries) && isObject(userSalaries)) {
       userSalaries.forEach((userSalary: any) => {
-        const thisUserMonth = userSalary.userId+userSalary.year+userSalary.month;
+        const thisUserMonth = userSalary.userId + userSalary.year + userSalary.month;
         salaries[thisUserMonth] = userSalary.companyWillPayMoney;
       });
     }
     const projectSalaries: {
-      [month: string]:  number;
+      [month: string]: number;
     } = {};
-    if(!isNil(result) && typeof result === 'object') {
+    if (!isNil(result) && typeof result === 'object') {
       for (const userId in result) {
         for (const month in result[userId]) {
-          const thisUserMonth = userId+result[userId][month].year+parseInt(result[userId][month].month);
+          const thisUserMonth = userId + result[userId][month].year + parseInt(result[userId][month].month);
           let thisSalary = 0;
           if (!isNil(salaries[thisUserMonth])) {
             thisSalary = salaries[thisUserMonth];
           }
-          if(!projectSalaries.hasOwnProperty(month)) {
-            projectSalaries[month] = thisSalary*result[userId][month].ac/100;
+          if (!projectSalaries.hasOwnProperty(month)) {
+            projectSalaries[month] = thisSalary * result[userId][month].ac / 100;
           } else {
-            projectSalaries[month] += thisSalary*result[userId][month].ac/100;
+            projectSalaries[month] += thisSalary * result[userId][month].ac / 100;
           }
         }
       }
@@ -688,13 +709,13 @@ export class ProjectsService implements ProjectNS.IProjectService {
       const dataResources = await this.resourceRepository.getDataResourceInProjectByMonth(startDate, endDate, parseInt(projectId));
       const dataDaysOff = await this.daysOffService.getDaysOffBetween(startDate, endDate);
       const listDaysOff: string[] = [];
-      if(!isNil(dataDaysOff)) {
+      if (!isNil(dataDaysOff)) {
         dataDaysOff.forEach((dayOff) => {
           listDaysOff.push(moment(dayOff.date).format('YYYY/MM/DD'));
         });
       }
       const availableDates = this.getListAvailableWeek(startDate, endDate, listDaysOff);
-      if(dataResources && isArray(dataResources)) {
+      if (dataResources && isArray(dataResources)) {
         dataResources.forEach((resource) => {
           let ac = resource.acPercent;
           let thisMonth = resource.month;
@@ -702,19 +723,19 @@ export class ProjectsService implements ProjectNS.IProjectService {
             thisMonth = '0' + thisMonth;
           }
           const thisYear = resource.year;
-          const keyMonth = thisYear+'/'+thisMonth;
+          const keyMonth = thisYear + '/' + thisMonth;
           const totalAvailable = availableDates['totalAvailable'][keyMonth];
-          if(ac > 100) {
+          if (ac > 100) {
             ac = 100;
           }
-          let userSalary =  resource.userProject.users.userSalaries.salary;
+          let userSalary = resource.userProject.users.userSalaries.salary;
           if (isNil(userSalary)) {
             userSalary = 0;
           }
           if (!isNil(salaries[keyMonth])) {
-            salaries[keyMonth] += ac*userSalary/totalAvailable/100;
+            salaries[keyMonth] += ac * userSalary / totalAvailable / 100;
           } else {
-            salaries[keyMonth] = ac*userSalary/totalAvailable/100;
+            salaries[keyMonth] = ac * userSalary / totalAvailable / 100;
           }
         });
       }
@@ -730,7 +751,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
     availableDate: {};
     totalAvailable: {};
   } {
-    let filterRange= {
+    let filterRange = {
       weekend: {},
       availableDate: {},
       totalAvailable: {}
@@ -745,7 +766,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
       // cuối tuần
       let flagDayOff = 0;
       listDaysOff.forEach((dayOff) => {
-        if(moment(trackingDate).format('YYYY/MM/DD') === dayOff) {
+        if (moment(trackingDate).format('YYYY/MM/DD') === dayOff) {
           flagDayOff = 1;
         }
       });

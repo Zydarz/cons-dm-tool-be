@@ -20,6 +20,8 @@ import { FilterProjectDto } from '../modules/projects/dto/requests/filter-projec
 import { default as ContractTypeEntity } from '../entities/contract-type.entity';
 import { default as CustomerEntity } from '../entities/customer.entity';
 import { default as DepartmentEntity } from '../entities/department.entity';
+import { TimeSheetProjectDto } from 'modules/projects/dto/responses/timesheet-project-dto';
+import { TimeSheetProjectMemberDto } from 'modules/projects/dto/responses/timesheet-project-member-dto';
 export class ProjectRepository implements ProjectNS.IProjectRepository {
   constructor(@Inject(ProjectEntity.name) private readonly projectEntity: typeof ProjectEntity) {}
 
@@ -373,6 +375,23 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
     });
     return projects.toDtos();
   }
+
+  async getProjectByUserId(id: string): Promise<TimeSheetProjectMemberDto[]> {
+    const projects = await this.projectEntity.findAll({
+      include: [
+        {
+          model: UserProjectEntity,
+          as: 'userProjects',
+          where: {
+            userId: id,
+          },
+        },
+      ],
+    });
+    return projects.toDtos();
+  }
+  
+
   async getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]> {
     const condition: WhereOptions = {};
     let isNest = false;

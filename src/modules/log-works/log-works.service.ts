@@ -37,6 +37,11 @@ export class LogWorksService implements LogWorkNS.ILogWorkService {
     return await this.logWorkRepository.getLogWork(projectId, logWorkFilterOptionsDto);
   }
 
+  
+  async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
+    return await this.logWorkRepository.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
+  }
+
   async getDetailLogWork(logWorkId: number): Promise<LogWorkDto> {
     const logWork = await this.findById(logWorkId);
     return logWork.toDto();

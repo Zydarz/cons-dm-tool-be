@@ -25,6 +25,7 @@ export namespace LogWorkNS {
   export interface ILogWorkService {
     createLogWork(userProjectId: number, createLogWorkDto: CreateLogWorkDto): Promise<SuccessResponseDto>;
     getLogWork(projectId: number, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
+    getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
     getDetailLogWork(logWorkId: number): Promise<LogWorkDto>;
     updateLogWork(logWorkId: number, updateLogWorkDto: RequestLogWorkDto): Promise<SuccessResponseDto>;
     checkPermission(userId: string, logWorkId: number): Promise<SuccessResponseDto>;
@@ -37,6 +38,7 @@ export namespace LogWorkNS {
   export interface ILogWorkRepository {
     createLogWork(userProjectId: number, logWorkDto: RequestLogWorkDto): Promise<SuccessResponseDto>;
     getLogWork(projectId: number, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
+    getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
     getDetailLogWork(logWorkId: number): Promise<LogWorkEntity | null>;
     updateLogWork(logWork: LogWorkEntity, updateLogWorkDto: RequestLogWorkDto): Promise<SuccessResponseDto>;
     checkPermission(userId: string, logWorkId: number): Promise<LogWorkEntity | null>;

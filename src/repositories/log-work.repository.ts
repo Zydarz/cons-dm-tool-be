@@ -114,6 +114,91 @@ export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
     return items.toPageDto(pageMetaDto);
   }
 
+  async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
+    const condition = {};
+    const userRelation = {
+      model: UserEntity,
+      as: 'users',
+      attributes: {
+        exclude: ['id', 'createdAt', 'updatedAt', 'deletedAt'],
+      },
+    };
+
+    const dailyReportActivitiesRelation = {
+      model: DailyReportActivitiesEntity,
+      as: 'dailyReportActivity',
+      attributes: ['id', 'name', 'deletedAt'],
+      paranoid: false,
+    };
+
+    const userProjectRelation = {
+      model: UserProjectEntity,
+      as: 'userProject',
+      where: {
+        userId,
+      },
+      include: [userRelation],
+      attributes: {
+        exclude: ['createdAt', 'updatedAt', 'deletedAt'],
+      },
+    };
+
+    if (!isNil(logWorkFilterOptionsDto)) {
+      let startDate: string | undefined;
+      let endDate: string | undefined;
+      if (!isNil(logWorkFilterOptionsDto.startDate) && !isNil(logWorkFilterOptionsDto.endDate)) {
+        startDate = moment(logWorkFilterOptionsDto.startDate).startOf('day').toISOString();
+        endDate = moment(logWorkFilterOptionsDto.endDate).endOf('day').toISOString();
+        Object.assign(condition, {
+          reportDate: { [Op.between]: [startDate, endDate] },
+        });
+      } else if (!isNil(logWorkFilterOptionsDto.startDate) && isNil(logWorkFilterOptionsDto.endDate)) {
+        startDate = moment(logWorkFilterOptionsDto.startDate).startOf('day').toISOString();
+        Object.assign(condition, {
+          reportDate: { [Op.gte]: startDate },
+        });
+      } else if (isNil(logWorkFilterOptionsDto.startDate) && !isNil(logWorkFilterOptionsDto.endDate)) {
+        endDate = moment(logWorkFilterOptionsDto.endDate).endOf('day').toISOString();
+        Object.assign(condition, {
+          reportDate: { [Op.lte]: endDate },
+        });
+      }
+      if (!isNil(logWorkFilterOptionsDto.userId)) {
+        const user = logWorkFilterOptionsDto.userId.split(',');
+        Object.assign(userProjectRelation, {
+          where: {
+            userId: { [Op.in]: user },
+          },
+        });
+      }
+
+      if (!isNil(logWorkFilterOptionsDto.q)) {
+        Object.assign(condition, {
+          [Op.or]: {
+            taskId: { [Op.substring]: logWorkFilterOptionsDto.q },
+            note: { [Op.substring]: logWorkFilterOptionsDto.q },
+          },
+        });
+      }
+    }
+    const results = await this.logWorkEntity.findAndCountAll({
+      where: condition,
+      order: [
+        ['reportDate', 'DESC'],
+        [userProjectRelation, userRelation, 'username', 'ASC'],
+      ],
+      include: [userProjectRelation, dailyReportActivitiesRelation],
+      limit: logWorkFilterOptionsDto.take,
+      offset: logWorkFilterOptionsDto.skip,
+      distinct: true,
+    });
+
+    const pageMetaDto = new PageMetaDto({ pageOptionsDto: logWorkFilterOptionsDto, itemCount: results.count });
+    const items = results.rows;
+
+    return items.toPageDto(pageMetaDto);
+  }
+
   async getDetailLogWork(logWorkId: number): Promise<LogWorkEntity | null> {
     const userRelation = {
       model: UserEntity,

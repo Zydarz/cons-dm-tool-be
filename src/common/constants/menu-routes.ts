@@ -413,4 +413,11 @@ export const Routes = {
       method: 'delete',
     },
   ],
+  'Timesheet': [
+    {
+      name: 'Get project and member for select option',
+      path: '/api/v1/projects/master-data-timesheet',
+      method: 'get',
+    },
+  ],
 };

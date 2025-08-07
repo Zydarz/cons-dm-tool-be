@@ -20,6 +20,8 @@ import { ResourceSummaryMonth } from '../../../modules/resource-summaries/dtos/r
 import { FilterProjectDto } from '../dto/requests/filter-project.dto';
 import { UserProjectDto } from '../../../modules/user-projects/dto/responses/user-project-dto';
 import { Transaction } from 'sequelize';
+import { TimeSheetProjectDto } from '../dto/responses/timesheet-project-dto';
+import { TimeSheetProjectMemberDto } from '../dto/responses/timesheet-project-member-dto';
 
 export namespace ProjectNS {
   export enum Type {
@@ -67,6 +69,7 @@ export namespace ProjectNS {
       user: UserEntity,
     ): Promise<SuccessResponseDto>;
     getLogWork(projectId: number, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
+    getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
     getDetailLogWork(logWorkId: number): Promise<LogWorkDto>;
     updateLogWork(
       logWorkId: number,
@@ -86,6 +89,7 @@ export namespace ProjectNS {
     getProjectbyId(id: number): Promise<ProjectDto>;
     getProjectForPm(email: string): Promise<ProjectDto[]>;
     getProjectOfUser(id: string): Promise<ProjectDto[]>;
+    getProjectAndMemberForTimesheets(user: UserEntity): Promise<TimeSheetProjectDto>;
     getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto, user: UserEntity): Promise<ProjectDto[]>;
     deleteMemberProject(projectId: number, userId: string, userEntity: UserEntity): Promise<SuccessResponseDto>;
     detailProject2(id: number, userId?: string, role?: UserNS.Roles): Promise<ProjectDto>;
@@ -116,6 +120,7 @@ export namespace ProjectNS {
     updateProjectPm(projectId: number, pm: string): Promise<void>;
     getProjectForPm(email: string): Promise<ProjectDto[]>;
     getProjectOfUser(id: string): Promise<ProjectDto[]>;
+    getProjectByUserId(id: string): Promise<TimeSheetProjectMemberDto[]>;
     getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]>;
     getProject(filter: FilterProjectDto): Promise<ProjectDto | null>;
     updateCustomerIdInProjectRecords(customerId: number, t?: Transaction): Promise<SuccessResponseDto>;

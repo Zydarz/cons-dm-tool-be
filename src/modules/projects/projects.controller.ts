@@ -50,6 +50,7 @@ import { CustomerNS } from '../../modules/customers/interfaces/customer';
 import { ResourceProjectFilterDto } from '../../modules/resources/dto/requests/resource-project-filter.dto';
 import { ProjectPositionResourceAllocateDto } from '../../modules/resources/dto/responses/project-position-res-allocate-dto';
 import { ResourceNS } from '../../modules/resources/interfaces/resource';
+import { TimeSheetProjectDto } from './dto/responses/timesheet-project-dto';
 @ApiTags('Project')
 @Controller('projects')
 export class ProjectsController {
@@ -198,6 +199,34 @@ export class ProjectsController {
     return await this.projectService.getLogWork(projectId, logWorkFilterOptionsDto);
   }
 
+  @Get(':id/log-works-user')
+  @HttpCode(HttpStatus.OK)
+  @Auth(UserNS.ALL)
+  async getLogWorkByUserId(
+    @Param('id') userId: string,
+    @AuthUser() user: UserEntity,
+    @Query(new ValidationPipe({ transform: true }))
+    logWorkFilterOptionsDto: LogWorkFilterOptionsDto,
+  ): Promise<PageDto<LogWorkDto>> {
+    return await this.projectService.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
+  }
+
+  @Get('master-data-timesheet')
+  @HttpCode(HttpStatus.OK)
+  @Auth(UserNS.ALL)
+  async getProjectAndMemberForTimesheets(
+    @AuthUser() user: UserEntity,
+  ): Promise<number> {
+
+  console.log('2222222');
+    //console.log('user',user);
+
+    return 1;
+  }
+
+
+
+
   @Get('log-works/:id')
   @HttpCode(HttpStatus.OK)
   @Auth(UserNS.ALL)
@@ -283,7 +312,6 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   @Auth(UserNS.ALL)
   async createPayment(@Body() params: CreatePaymentDto, @AuthUser() user: UserEntity): Promise<PaymentDto> {
-    console.log(11111);
     return await this.paymentTrackingService.createPayment(params, user);
   }
 
@@ -325,4 +353,22 @@ export class ProjectsController {
   ): Promise<object> {
     return await this.projectService.getProjectSalaries(projectId, resourceProjectFilterDto, user);
   }
+
+
+
+//   @Get('timesheets')
+//   @Auth(UserNS.ALL)
+//   async getProjectAndMemberForTimesheets(
+//     @AuthUser() user: UserEntity,
+//   ): Promise<number> {
+    
+//     console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
+
+// //    console.log('1111111');
+//   //  console.log('user',user);
+//     return 1;
+    
+//   }
+
+
 }
