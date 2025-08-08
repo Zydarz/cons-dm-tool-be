@@ -21,7 +21,7 @@ import { FilterProjectDto } from '../dto/requests/filter-project.dto';
 import { UserProjectDto } from '../../../modules/user-projects/dto/responses/user-project-dto';
 import { Transaction } from 'sequelize';
 import { TimeSheetProjectDto } from '../dto/responses/timesheet-project-dto';
-import { TimeSheetProjectMemberDto } from '../dto/responses/timesheet-project-member-dto';
+import { TimeSheetProjectOfMemberDto } from '../dto/responses/timesheet-project-member-dto';
 
 export namespace ProjectNS {
   export enum Type {
@@ -120,7 +120,7 @@ export namespace ProjectNS {
     updateProjectPm(projectId: number, pm: string): Promise<void>;
     getProjectForPm(email: string): Promise<ProjectDto[]>;
     getProjectOfUser(id: string): Promise<ProjectDto[]>;
-    getProjectByUserId(id: string): Promise<TimeSheetProjectMemberDto[]>;
+    getProjectByUserId(id: string): Promise<TimeSheetProjectOfMemberDto[]>;
     getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]>;
     getProject(filter: FilterProjectDto): Promise<ProjectDto | null>;
     updateCustomerIdInProjectRecords(customerId: number, t?: Transaction): Promise<SuccessResponseDto>;

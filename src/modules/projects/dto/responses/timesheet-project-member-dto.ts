@@ -11,7 +11,9 @@ import { default as UserEntity } from '../../../../entities/users.entity';
 import { ContractTypeDto, DepartmentDto } from '../../../master-data/dtos/master-data.dto';
 import { CustomerDto } from '../../../customers/dto/responses/customer-dto';
 
-export class TimeSheetProjectMemberDto extends AbstractDto {
+
+
+export class TimeSheetProjectOfMemberDto extends AbstractDto {
 
   @ApiProperty()
   name: string;
@@ -19,24 +21,13 @@ export class TimeSheetProjectMemberDto extends AbstractDto {
   @ApiProperty()
   code: string;
 
-
   @ApiPropertyOptional()
   pm?: string;
 
-  @ApiPropertyOptional()
-  userProjects?: UserProjectDto[];
-
-  @ApiPropertyOptional({ type: () => [UserDto] })
-  user?: UserDto[];
-
-
-  constructor(project: ProjectEntity, user?: UserEntity[]) {
-    super(project);
+  constructor(project: ProjectEntity) {
+    super(project); // ✅ Khởi tạo id, createdAt, updatedAt
     this.name = project.name;
     this.code = project.code;
     this.pm = project.pm;
-   
-    this.userProjects = project.userProjects?.toDtos();
-    this.user = UserNS.dtos.toUserDtos(user);
   }
 }

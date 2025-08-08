@@ -38,6 +38,7 @@ import { UserPaggingDto } from '../modules/users/dto/response/user-pagging-dto';
 import { SalaryDto } from '../modules/users/dto/response/salary-dto';
 import { CheckExitsEmployeeDto } from '../modules/users/dto/request/check-exits-employe-dto';
 import sequelize from 'sequelize';
+import { TimeSheetMemberDto } from '../modules/users/dto/response/user-project-dto';
 export class UsersRepository implements UserNS.IUserRepository {
   constructor(@Inject('UserEntity') private readonly userEntity: typeof UserEntity,
     @Inject('DepartmentEntity') private readonly departmentEntity: typeof DepartmentEntity,
@@ -505,6 +506,28 @@ export class UsersRepository implements UserNS.IUserRepository {
       order: [['username', 'ASC']],
     });
   }
+
+async getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]> {
+  if (!ids || ids.length === 0) {
+    return [];
+  }
+
+  const projects = await this.userEntity.findAll({
+    include: [
+      {
+        model: UserProjectEntity,
+        as: 'userProjects',
+        where: {
+          projectId: {
+            [Op.in]: ids,
+          },
+        },
+      },
+    ],
+  });
+  
+  return projects.map(project => new TimeSheetMemberDto(project));
+}
 
   async countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number> {
     const { userIds, userId, projectIds } = dto;

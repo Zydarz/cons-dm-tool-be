@@ -21,6 +21,7 @@ import { GetSalaryDto } from '../dto/request/get-salary-dto';
 import { GetSalaryCostDto } from '../dto/request/get-salary-cost-dto';
 import { UserForSalaryCostDto } from '../dto/response/users-for-salary-cost';
 import { CheckExitsEmployeeDto } from '../dto/request/check-exits-employe-dto';
+import { TimeSheetMemberDto } from '../dto/response/user-project-dto';
 export namespace UserNS {
   export enum Roles {
     ADMIN = 'admin',
@@ -76,6 +77,7 @@ export namespace UserNS {
     updateUserIfNeed(user: GUser): Promise<Boolean>;
     getUserByEmail(email: string): Promise<UserDto>;
     getAllProjectOfUser(filterOptions: FilterUserAllowcationDto, option?: string, pm?: string): Promise<UserEntity[]>;
+    getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]>;
     countUser(role: UserNS.Roles, filterOptions: FilterUserAllowcationDto): Promise<number>;
     createUser(param: CreateUserDto): Promise<UserDto>;
     updateUser(id: string, param: UpdateUserDto): Promise<UserDto>;
@@ -109,6 +111,7 @@ export namespace UserNS {
     getUserAll(fields: Array<string>, filterOptions: FilterUserSummaryDto): Promise<UserEntity[]>;
     getUserByEmail(email: string): Promise<UserEntity | null>;
     getAllProjectOfUser(filterOptions: FilterUserAllowcationDto, option?: string, pm?: string): Promise<UserEntity[]>;
+    getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]>;
     countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number>;
     createUser(user: AzureUserDto, param: CreateUserDto): Promise<UserEntity>;
     updateUser(id: string, param: UpdateUserDto): Promise<UserEntity>;

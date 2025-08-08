@@ -35,6 +35,7 @@ import { FullUpdateSalaryDto } from '../../modules/user-salary/dto/requests/full
 import { DepartmentDto, JobRankDto, LineDto } from '../../modules/master-data/dtos/master-data.dto';
 import { UserSalaryService } from '../../modules/user-salary/user-salary.service';
 import { CheckExitsEmployeeDto } from './dto/request/check-exits-employe-dto';
+import { TimeSheetMemberDto } from './dto/response/user-project-dto';
 @Injectable()
 export class UserService implements UserNS.IUserService {
   constructor(
@@ -218,6 +219,13 @@ export class UserService implements UserNS.IUserService {
     view?: string,
   ): Promise<UserEntity[]> {
     return await this.userRepository.getAllProjectOfUser(filterOptions, options, view);
+  }
+
+  
+  async getMemberByProjectId(
+    ids: number[]
+  ): Promise<TimeSheetMemberDto[]> {
+    return await this.userRepository.getMemberByProjectId(ids);
   }
 
   async countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number> {

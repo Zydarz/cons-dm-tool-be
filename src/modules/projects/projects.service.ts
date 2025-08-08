@@ -61,6 +61,9 @@ export class ProjectsService implements ProjectNS.IProjectService {
     @Inject('IUserService')
     private readonly userService: UserNS.IUserService,
 
+
+
+
     @Inject('ITeamsService')
     private readonly teamsService: ITeamsService,
 
@@ -83,6 +86,8 @@ export class ProjectsService implements ProjectNS.IProjectService {
 
     @Inject('IUserSalaryRepository')
     private readonly userSalaryRepository: IUserSalaryRepository,
+
+    
 
     @Inject(Sequelize.name)
     private readonly sequelize: Sequelize,
@@ -197,17 +202,15 @@ export class ProjectsService implements ProjectNS.IProjectService {
   async getProjectAndMemberForTimesheets(
     user: UserEntity,
   ): Promise<TimeSheetProjectDto> {
-
-    console.log('2222222222222');
     const projects = await this.projectRepository.getProjectByUserId(user.id);
+    var projectsByPM = projects.filter(project =>
+      project.pm?.includes(`"haida"`)
+    );
 
-
-console.log('projects',projects);
-
-    // Tạo một đối tượng TimeSheetProjectDto. 
-    // Nếu 'data' là mảng rỗng hoặc null, thì 'projects' cũng sẽ là mảng rỗng.
+    var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
     const timesheet: TimeSheetProjectDto = {
-      projects: projects || [], // Dùng || [] để đảm bảo 'projects' luôn là một mảng
+      projects: projects || [], 
+      members: members || [], 
     };
 
     return timesheet;

@@ -1,18 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserDto } from '../../../users/dto/response/user-dto';
 import { default as UserEntity } from '../../../../entities/users.entity';
-import { TimeSheetProjectMemberDto } from './timesheet-project-member-dto';
+import { TimeSheetProjectOfMemberDto } from './timesheet-project-member-dto';
+import { TimeSheetMemberDto } from 'modules/users/dto/response/user-project-dto';
 
 export class TimeSheetProjectDto  {
   
   @ApiProperty()
-  projects: TimeSheetProjectMemberDto[];
+  projects: TimeSheetProjectOfMemberDto[];
 
   @ApiPropertyOptional({ type: () => [UserDto] })
-  users?: UserDto[];
+  members?: TimeSheetMemberDto[];
 
-  constructor(project: TimeSheetProjectMemberDto[], user?: UserDto[]) {
+  constructor(project: TimeSheetProjectOfMemberDto[], user?: TimeSheetMemberDto[]) {
     this.projects = project;
-    this.users = user;
+    this.members = user;
   }
 }

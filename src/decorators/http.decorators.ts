@@ -12,7 +12,6 @@ import { GoogleGuard } from '../guards/google.guard';
 
 export function Auth(roles: UserNS.Roles[] = [], options?: Partial<{ public: boolean }>): MethodDecorator {
   const isPublicRoute = options?.public;
-
   return applyDecorators(
     SetMetadata('roles', roles),
     UseGuards(GoogleGuard, RolesGuard),

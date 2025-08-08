@@ -60,7 +60,7 @@ export class ProjectsController {
     @Inject('IPaymentTrackingService') private readonly paymentTrackingService: PaymentNS.IPaymentTrackingService,
     @Inject('ICustomerService') private readonly customerService: CustomerNS.ICustomerService,
     @Inject(forwardRef(() => 'IResourceService')) private readonly resourceService: ResourceNS.IResourceService,
-  ) {}
+  ) { }
 
   @Get()
   @HttpCode(HttpStatus.OK)
@@ -211,19 +211,18 @@ export class ProjectsController {
     return await this.projectService.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
   }
 
-  @Get('master-data-timesheet')
+  @Get(':id/master-data-timesheet')
   @HttpCode(HttpStatus.OK)
   @Auth(UserNS.ALL)
   async getProjectAndMemberForTimesheets(
+    @Param('id') userId: string,
     @AuthUser() user: UserEntity,
-  ): Promise<number> {
-
-  console.log('2222222');
-    //console.log('user',user);
-
-    return 1;
+    @Query(new ValidationPipe({ transform: true }))
+    logWorkFilterOptionsDto: LogWorkFilterOptionsDto,
+  ): Promise<TimeSheetProjectDto> {
+    console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
+    return await this.projectService.getProjectAndMemberForTimesheets(user);
   }
-
 
 
 
@@ -356,19 +355,19 @@ export class ProjectsController {
 
 
 
-//   @Get('timesheets')
-//   @Auth(UserNS.ALL)
-//   async getProjectAndMemberForTimesheets(
-//     @AuthUser() user: UserEntity,
-//   ): Promise<number> {
-    
-//     console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
+  //   @Get('timesheets')
+  //   @Auth(UserNS.ALL)
+  //   async getProjectAndMemberForTimesheets(
+  //     @AuthUser() user: UserEntity,
+  //   ): Promise<number> {
 
-// //    console.log('1111111');
-//   //  console.log('user',user);
-//     return 1;
-    
-//   }
+  //     console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
+
+  // //    console.log('1111111');
+  //   //  console.log('user',user);
+  //     return 1;
+
+  //   }
 
 
 }

@@ -21,9 +21,10 @@ import { default as ContractTypeEntity } from '../entities/contract-type.entity'
 import { default as CustomerEntity } from '../entities/customer.entity';
 import { default as DepartmentEntity } from '../entities/department.entity';
 import { TimeSheetProjectDto } from 'modules/projects/dto/responses/timesheet-project-dto';
-import { TimeSheetProjectMemberDto } from 'modules/projects/dto/responses/timesheet-project-member-dto';
+// ✅ Đúng - sử dụng đường dẫn tương đối
+import { TimeSheetProjectOfMemberDto } from '../modules/projects/dto/responses/timesheet-project-member-dto';
 export class ProjectRepository implements ProjectNS.IProjectRepository {
-  constructor(@Inject(ProjectEntity.name) private readonly projectEntity: typeof ProjectEntity) {}
+  constructor(@Inject(ProjectEntity.name) private readonly projectEntity: typeof ProjectEntity) { }
 
   async getAll(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<PageDto<ProjectDto>> {
     const condition = {};
@@ -306,14 +307,14 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
       throw ProjectNS.errMsg.ProjectNotFound;
     }
     const code = project.code.split('-');
-    if(name) {
+    if (name) {
       code[1] = ` ${name} `;
       code[2] = ` ${updateProjectDto.name} `;
       code[3] = ` ${updateProjectDto.am}`;
     } else {
       code[1] = ` ${updateProjectDto.name} `;
       code[2] = ` ${updateProjectDto.am}`;
-      if(code[3]) {
+      if (code[3]) {
         code.splice(3);
       }
     }
@@ -376,7 +377,7 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
     return projects.toDtos();
   }
 
-  async getProjectByUserId(id: string): Promise<TimeSheetProjectMemberDto[]> {
+  async getProjectByUserId(id: string): Promise<TimeSheetProjectOfMemberDto[]> {
     const projects = await this.projectEntity.findAll({
       include: [
         {
@@ -388,9 +389,10 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
         },
       ],
     });
-    return projects.toDtos();
+
+    // ✅ Cách 1: Map từng project thành DTO
+    return projects.map(project => new TimeSheetProjectOfMemberDto(project));
   }
-  
 
   async getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]> {
     const condition: WhereOptions = {};
