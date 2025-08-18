@@ -16,7 +16,7 @@ import { default as ProjectEntity } from '../entities/project.entity';
 import { default as DailyReportActivitiesEntity } from '../entities/daily-report-activities.entity';
 
 export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
-  constructor(@Inject(LogWorkEntity.name) private readonly logWorkEntity: typeof LogWorkEntity) {}
+  constructor(@Inject(LogWorkEntity.name) private readonly logWorkEntity: typeof LogWorkEntity) { }
   async createLogWork(userProjectId: number, logWorkDto: RequestLogWorkDto): Promise<SuccessResponseDto> {
     await this.logWorkEntity.create({
       userProjectId,
@@ -124,6 +124,15 @@ export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
       },
     };
 
+    const projectRelation = {
+      model: ProjectEntity,
+      as: 'projects',
+      attributes: {
+        exclude: ['id', 'createdAt', 'updatedAt', 'deletedAt'],
+      },
+    };
+
+
     const dailyReportActivitiesRelation = {
       model: DailyReportActivitiesEntity,
       as: 'dailyReportActivity',
@@ -137,7 +146,7 @@ export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
       where: {
         userId,
       },
-      include: [userRelation],
+      include: [userRelation,projectRelation],
       attributes: {
         exclude: ['createdAt', 'updatedAt', 'deletedAt'],
       },
@@ -172,6 +181,8 @@ export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
         });
       }
 
+      
+
       if (!isNil(logWorkFilterOptionsDto.q)) {
         Object.assign(condition, {
           [Op.or]: {
@@ -198,6 +209,117 @@ export class LogWorkRepository implements LogWorkNS.ILogWorkRepository {
 
     return items.toPageDto(pageMetaDto);
   }
+
+  
+// Gợi ý: Đổi tên hàm để thể hiện rõ chức năng hơn (ví dụ: getLogWorks)
+async getLogWorksMember(
+  userIds: string[],
+  projectIds: string[], // <-- 1. Thêm tham số projectIds
+  logWorkFilterOptionsDto: LogWorkFilterOptionsDto,
+): Promise<PageDto<LogWorkDto>> {
+  // 2. Xây dựng điều kiện lọc cho bảng user_projects một cách linh hoạt
+  const userProjectWhereConditions = {};
+
+  if (userIds && userIds.length > 0) {
+    Object.assign(userProjectWhereConditions, {
+      userId: { [Op.in]: userIds },
+    });
+  }
+
+  if (projectIds && projectIds.length > 0) {
+    Object.assign(userProjectWhereConditions, {
+      projectId: { [Op.in]: projectIds },
+    });
+  }
+
+  // 3. Xử lý trường hợp không có bộ lọc nào được cung cấp -> trả về rỗng để an toàn
+  if (Object.keys(userProjectWhereConditions).length === 0) {
+    const pageMetaDto = new PageMetaDto({ pageOptionsDto: logWorkFilterOptionsDto, itemCount: 0 });
+    return new PageDto([], pageMetaDto);
+  }
+
+  const condition = {};
+  const userRelation = {
+    model: UserEntity,
+    as: 'users',
+    attributes: {
+      exclude: ['id', 'createdAt', 'updatedAt', 'deletedAt'],
+    },
+  };
+
+  const projectRelation = {
+    model: ProjectEntity,
+    as: 'projects',
+    attributes: {
+      exclude: ['id', 'createdAt', 'updatedAt', 'deletedAt'],
+    },
+  };
+
+  const dailyReportActivitiesRelation = {
+    model: DailyReportActivitiesEntity,
+    as: 'dailyReportActivity',
+    attributes: ['id', 'name', 'deletedAt'],
+    paranoid: false,
+  };
+
+  const userProjectRelation = {
+    model: UserProjectEntity,
+    as: 'userProject',
+    where: userProjectWhereConditions, // <-- 4. Áp dụng các điều kiện đã xây dựng
+    include: [userRelation, projectRelation],
+    attributes: {
+      exclude: ['createdAt', 'updatedAt', 'deletedAt'],
+    },
+  };
+
+  if (!isNil(logWorkFilterOptionsDto)) {
+    // Logic xử lý ngày tháng giữ nguyên
+    if (!isNil(logWorkFilterOptionsDto.startDate) && !isNil(logWorkFilterOptionsDto.endDate)) {
+      const startDate = moment(logWorkFilterOptionsDto.startDate).startOf('day').toISOString();
+      const endDate = moment(logWorkFilterOptionsDto.endDate).endOf('day').toISOString();
+      Object.assign(condition, {
+        reportDate: { [Op.between]: [startDate, endDate] },
+      });
+    } else if (!isNil(logWorkFilterOptionsDto.startDate)) {
+      const startDate = moment(logWorkFilterOptionsDto.startDate).startOf('day').toISOString();
+      Object.assign(condition, {
+        reportDate: { [Op.gte]: startDate },
+      });
+    } else if (!isNil(logWorkFilterOptionsDto.endDate)) {
+      const endDate = moment(logWorkFilterOptionsDto.endDate).endOf('day').toISOString();
+      Object.assign(condition, {
+        reportDate: { [Op.lte]: endDate },
+      });
+    }
+    
+    // Logic tìm kiếm theo query string giữ nguyên
+    if (!isNil(logWorkFilterOptionsDto.q)) {
+      Object.assign(condition, {
+        [Op.or]: {
+          taskId: { [Op.substring]: logWorkFilterOptionsDto.q },
+          note: { [Op.substring]: logWorkFilterOptionsDto.q },
+        },
+      });
+    }
+  }
+
+  const results = await this.logWorkEntity.findAndCountAll({
+    where: condition,
+    order: [
+      ['reportDate', 'DESC'],
+      [userProjectRelation, userRelation, 'username', 'ASC'],
+    ],
+    include: [userProjectRelation, dailyReportActivitiesRelation],
+    limit: logWorkFilterOptionsDto.take,
+    offset: logWorkFilterOptionsDto.skip,
+    distinct: true,
+  });
+
+  const pageMetaDto = new PageMetaDto({ pageOptionsDto: logWorkFilterOptionsDto, itemCount: results.count });
+  const items = results.rows;
+
+  return items.toPageDto(pageMetaDto);
+}
 
   async getDetailLogWork(logWorkId: number): Promise<LogWorkEntity | null> {
     const userRelation = {

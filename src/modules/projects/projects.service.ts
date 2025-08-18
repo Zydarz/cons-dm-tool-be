@@ -87,7 +87,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
     @Inject('IUserSalaryRepository')
     private readonly userSalaryRepository: IUserSalaryRepository,
 
-    
+
 
     @Inject(Sequelize.name)
     private readonly sequelize: Sequelize,
@@ -204,13 +204,13 @@ export class ProjectsService implements ProjectNS.IProjectService {
   ): Promise<TimeSheetProjectDto> {
     const projects = await this.projectRepository.getProjectByUserId(user.id);
     var projectsByPM = projects.filter(project =>
-      project.pm?.includes(`"haida"`)
+      project.pm?.includes(`"${user.username}"`),
     );
 
     var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
     const timesheet: TimeSheetProjectDto = {
-      projects: projects || [], 
-      members: members || [], 
+      projects: projects || [],
+      members: members || [],
     };
 
     return timesheet;
@@ -406,7 +406,63 @@ export class ProjectsService implements ProjectNS.IProjectService {
   }
 
   async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
-    return await this.logWorkService.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
+    //CheckuserId
+    var user = await this.userService.getUserById(userId);
+    if (user) {
+      // retrutn ở day
+    }
+
+    const checkProject = this.validDataForTimesheet(logWorkFilterOptionsDto.projects);
+    const checkMember = this.validDataForTimesheet(logWorkFilterOptionsDto.members);
+
+    //  console.log('checkProject',checkProject);
+    // console.log('checkMember',checkMember);
+
+
+    if (checkProject && checkMember) {
+      //Chọn cả Project và Member
+    }
+    else if (checkProject && !checkMember) {
+      //Chọn Project nhưng không chọn Member
+    }
+    else if (!checkProject && checkMember) {
+      // Chọn Member nhưng không chọn Project
+    }
+    else {
+      // Không chọn cả Project và Member
+      // const projects = await this.projectRepository.getProjectByUserId(user.id);
+      // var projectsByPM = projects.filter(project =>
+      //   project.pm?.includes(`"${user.username}"`),
+      // );
+
+      // var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
+      // const timesheet: TimeSheetProjectDto = {
+      //   projects: projects || [],
+      //   members: members || [],
+      // };
+
+      var dataShow =  await this.logWorkService.getLogWorksMember(checkProject,checkMember, logWorkFilterOptionsDto);
+
+       console.log('dataShow',dataShow);
+
+    }
+
+
+
+    return await this.logWorkService.getLogWorkByUserId(user.id, logWorkFilterOptionsDto);
+  }
+
+
+  validDataForTimesheet(input) {
+    if (!input) {
+      return null;
+    }
+    const cleanedIds = input
+      .split(',') // Tách chuỗi thành mảng: [" 101", "205", "300 "]
+      .map(id => id.trim()) // Loại bỏ khoảng trắng ở đầu/cuối mỗi ID: ["101", "205", "300"]
+      .filter(id => id !== ''); // Loại bỏ các ID rỗng nếu có (ví dụ: "101,,205")
+
+    return cleanedIds.length > 0 ? cleanedIds.join(',') : null;
   }
 
   async getDetailLogWork(logWorkId: number): Promise<LogWorkDto> {

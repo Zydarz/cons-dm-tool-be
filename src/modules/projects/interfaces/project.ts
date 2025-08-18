@@ -70,6 +70,7 @@ export namespace ProjectNS {
     ): Promise<SuccessResponseDto>;
     getLogWork(projectId: number, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
     getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>>;
+ 
     getDetailLogWork(logWorkId: number): Promise<LogWorkDto>;
     updateLogWork(
       logWorkId: number,

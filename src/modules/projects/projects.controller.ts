@@ -220,7 +220,6 @@ export class ProjectsController {
     @Query(new ValidationPipe({ transform: true }))
     logWorkFilterOptionsDto: LogWorkFilterOptionsDto,
   ): Promise<TimeSheetProjectDto> {
-    console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
     return await this.projectService.getProjectAndMemberForTimesheets(user);
   }
 

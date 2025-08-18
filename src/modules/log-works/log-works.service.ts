@@ -18,7 +18,7 @@ export class LogWorksService implements LogWorkNS.ILogWorkService {
     @Inject('ILogWorkRepository') private readonly logWorkRepository: LogWorkNS.ILogWorkRepository,
     @Inject('IResourceSummaryService') private readonly resourceSummaryService: IResourceSummaryService,
     @Inject('IUserProjectService') private readonly userProjectService: UserProjectNS.IUserProjectServices,
-  ) {}
+  ) { }
   async createLogWork(userProjectId: number, createLogWorkDto: CreateLogWorkDto): Promise<SuccessResponseDto> {
     for (const logWorkDto of createLogWorkDto.logWorks) {
       const { reportDate, actualEffort } = logWorkDto;
@@ -37,9 +37,13 @@ export class LogWorksService implements LogWorkNS.ILogWorkService {
     return await this.logWorkRepository.getLogWork(projectId, logWorkFilterOptionsDto);
   }
 
-  
+
   async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
     return await this.logWorkRepository.getLogWorkByUserId(userId, logWorkFilterOptionsDto);
+  }
+
+  async getLogWorksMember(userIds: string[], projectIds: string[], logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
+    return await this.logWorkRepository.getLogWorksMember(userIds, projectIds, logWorkFilterOptionsDto);
   }
 
   async getDetailLogWork(logWorkId: number): Promise<LogWorkDto> {

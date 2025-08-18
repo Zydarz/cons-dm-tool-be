@@ -17,4 +17,12 @@ export class LogWorkFilterOptionsDto extends PageOptionsDto {
   @IsOptional()
   @IsString()
   readonly userId?: string;
+
+  @IsOptional()
+  @IsString()
+  projects?: string; // Dạng '1,2,3'
+
+  @IsOptional()
+  @IsString()
+  members?: string; // Dạng '1,2,3'
 }
