@@ -202,18 +202,31 @@ export class ProjectsService implements ProjectNS.IProjectService {
   async getProjectAndMemberForTimesheets(
     user: UserEntity,
   ): Promise<TimeSheetProjectDto> {
-    const projects = await this.projectRepository.getProjectByUserId(user.id);
-    var projectsByPM = projects.filter(project =>
-      project.pm?.includes(`"${user.username}"`),
-    );
+    if (user.role === UserNS.Roles.ADMIN || user.role === UserNS.Roles.LOS) {
+      const projects = await this.projectRepository.getAllProjectsForTimesheet();
+      var members = await this.userService.getAllMembersForTimesheet();
+      const timesheet: TimeSheetProjectDto = {
+        projects: projects || [],
+        members: members || [],
+      };
 
-    var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
-    const timesheet: TimeSheetProjectDto = {
-      projects: projects || [],
-      members: members || [],
-    };
+      return timesheet;
+    }
+    else {
+      const projects = await this.projectRepository.getProjectByUserId(user.id);
+      var projectsByPM = projects.filter(project =>
+        project.pm?.includes(`"${user.username}"`),
+      );
 
-    return timesheet;
+      var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
+      const timesheet: TimeSheetProjectDto = {
+        projects: projects || [],
+        members: members || [],
+      };
+
+      return timesheet;
+    }
+
   }
 
   async createProject(createProjectDto: CreateProjectDto): Promise<ProjectDto> {

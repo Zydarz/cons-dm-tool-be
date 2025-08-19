@@ -139,8 +139,8 @@ export class UsersRepository implements UserNS.IUserRepository {
         nest: true,
         ...(true && { distinct: true }) as any, // 👈 ép kiểu để tránh lỗi TS
       });
-      
-      
+
+
       return userActive.concat(userInActive);
     } else {
       return await this.userEntity.findAll({
@@ -507,27 +507,34 @@ export class UsersRepository implements UserNS.IUserRepository {
     });
   }
 
-async getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]> {
-  if (!ids || ids.length === 0) {
-    return [];
-  }
+  async getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]> {
+    if (!ids || ids.length === 0) {
+      return [];
+    }
 
-  const projects = await this.userEntity.findAll({
-    include: [
-      {
-        model: UserProjectEntity,
-        as: 'userProjects',
-        where: {
-          projectId: {
-            [Op.in]: ids,
+    const projects = await this.userEntity.findAll({
+      include: [
+        {
+          model: UserProjectEntity,
+          as: 'userProjects',
+          where: {
+            projectId: {
+              [Op.in]: ids,
+            },
           },
         },
-      },
-    ],
-  });
-  
-  return projects.map(project => new TimeSheetMemberDto(project));
-}
+      ],
+    });
+
+    return projects.map(project => new TimeSheetMemberDto(project));
+  }
+
+  async getAllMembersForTimesheet(): Promise<TimeSheetMemberDto[]> {
+    const users = await this.userEntity.findAll();
+    return users.map(user => new TimeSheetMemberDto(user));
+  }
+
+
 
   async countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number> {
     const { userIds, userId, projectIds } = dto;
@@ -604,7 +611,7 @@ async getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]> {
       return users;
     } catch (e) {
 
-      console.log('err',e);
+      console.log('err', e);
 
       throw UserNS.ERRORS.UserExisted;
     }

@@ -78,6 +78,7 @@ export namespace UserNS {
     getUserByEmail(email: string): Promise<UserDto>;
     getAllProjectOfUser(filterOptions: FilterUserAllowcationDto, option?: string, pm?: string): Promise<UserEntity[]>;
     getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]>;
+    getAllMembersForTimesheet(): Promise<TimeSheetMemberDto[]> ;
     countUser(role: UserNS.Roles, filterOptions: FilterUserAllowcationDto): Promise<number>;
     createUser(param: CreateUserDto): Promise<UserDto>;
     updateUser(id: string, param: UpdateUserDto): Promise<UserDto>;
@@ -112,6 +113,7 @@ export namespace UserNS {
     getUserByEmail(email: string): Promise<UserEntity | null>;
     getAllProjectOfUser(filterOptions: FilterUserAllowcationDto, option?: string, pm?: string): Promise<UserEntity[]>;
     getMemberByProjectId(ids: number[]): Promise<TimeSheetMemberDto[]>;
+    getAllMembersForTimesheet(): Promise<TimeSheetMemberDto[]> ;
     countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number>;
     createUser(user: AzureUserDto, param: CreateUserDto): Promise<UserEntity>;
     updateUser(id: string, param: UpdateUserDto): Promise<UserEntity>;

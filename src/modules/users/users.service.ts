@@ -57,7 +57,7 @@ export class UserService implements UserNS.IUserService {
 
     @Inject('IOtherCostService') private readonly otherCostService: IOtherCostService,
     @Inject('IUserSalaryService') private readonly userSalaryService: UserSalaryService,
-  ) {}
+  ) { }
 
   async getAllUser(search: IUserSearch, user: UserEntity): Promise<UserDto[]> {
     let users: UserDto[] = [];
@@ -108,13 +108,13 @@ export class UserService implements UserNS.IUserService {
       return users;
     }
     if (userStore === UserNS.UserStore.MASTERDATA) {
-    //  console.log('search',search);
-     // console.log('role',role);
+      //  console.log('search',search);
+      // console.log('role',role);
       //console.log('user',user);
       users = await this.userRepository.getPaginationUsers(search, role, user);
-      if(!isNil(users.data)) {
+      if (!isNil(users.data)) {
         users.data.forEach((ud: any) => {
-          if(!isNil(ud.userSalaries)) {
+          if (!isNil(ud.userSalaries)) {
             ud.userSalaries.forEach((us: any) => {
               us = this.userSalaryService.computeSalary(us);
             })
@@ -221,11 +221,16 @@ export class UserService implements UserNS.IUserService {
     return await this.userRepository.getAllProjectOfUser(filterOptions, options, view);
   }
 
-  
+
   async getMemberByProjectId(
     ids: number[]
   ): Promise<TimeSheetMemberDto[]> {
     return await this.userRepository.getMemberByProjectId(ids);
+  }
+
+  async getAllMembersForTimesheet(
+  ): Promise<TimeSheetMemberDto[]> {
+    return await this.userRepository.getAllMembersForTimesheet();
   }
 
   async countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number> {
@@ -308,7 +313,7 @@ export class UserService implements UserNS.IUserService {
   }
 
   async getUserSalary(param: any): Promise<object> {
-    let usersEntity =  await this.userRepository.getUserSalary(param);
+    let usersEntity = await this.userRepository.getUserSalary(param);
     let usersSalaries: {
       [userId: string]: {
         id: string,
@@ -337,12 +342,12 @@ export class UserService implements UserNS.IUserService {
           }]
         }
       } = {};
-      if(!isNil(u.userSalaries)) {
+      if (!isNil(u.userSalaries)) {
         u.userSalaries.forEach((us) => {
-          if(!isNil(us.departmentId)) {
-            if(!usersInfoSalaries.hasOwnProperty(us.departmentId)) {
+          if (!isNil(us.departmentId)) {
+            if (!usersInfoSalaries.hasOwnProperty(us.departmentId)) {
               usersInfoSalaries[us.departmentId] = {
-                departmentName: us.department?.name??'',
+                departmentName: us.department?.name ?? '',
                 departmentInfo: [{
                   month: us.month,
                   year: us.year,
@@ -359,10 +364,10 @@ export class UserService implements UserNS.IUserService {
           }
         });
       }
-      if(!usersSalaries.hasOwnProperty(u.id)) {
+      if (!usersSalaries.hasOwnProperty(u.id)) {
         usersSalaries[u.id] = {
           id: u.id,
-          name: u.surName??'',
+          name: u.surName ?? '',
           info: usersInfoSalaries
         }
       } else {
@@ -373,20 +378,20 @@ export class UserService implements UserNS.IUserService {
   }
 
   async getCountUserSalary(param: GetSalaryDto): Promise<Number> {
-    return  await this.userRepository.getCountUserSalary(param);
+    return await this.userRepository.getCountUserSalary(param);
   }
 
   async getUserForSalaryCost(param: GetSalaryCostDto): Promise<UserForSalaryCostDto[]> {
-    let usersEntity =  await this.userRepository.getUserForSalaryCost(param);
+    let usersEntity = await this.userRepository.getUserForSalaryCost(param);
     let users: UserForSalaryCostDto[] = [];
     users = usersEntity.map((user) => new UserForSalaryCostDto(user));
     return users;
   }
 
   async deleteDepartmentSalaries(id: string, year: number, month: number): Promise<SuccessResponseDto> {
-    const resSalary =  await this.userRepository.deleteDepartmentCost(id, year, month);
+    const resSalary = await this.userRepository.deleteDepartmentCost(id, year, month);
     const resOther = await this.otherCostService.deleteDepartmentCost(id, year, month);
-    if(resSalary.success && resOther.success) {
+    if (resSalary.success && resOther.success) {
       return new SuccessResponseDto(true);
     }
     return new SuccessResponseDto(false);
@@ -394,7 +399,7 @@ export class UserService implements UserNS.IUserService {
 
   async getDetailUserWithSalaries(param: GetSalaryDto): Promise<SalaryDto> {
     let dataUS = await this.userRepository.getDetailUserWithSalaries(param);
-    if(!isNil(dataUS.userSalaries)) {
+    if (!isNil(dataUS.userSalaries)) {
       dataUS.userSalaries.forEach((us: any) => {
         us = this.userSalaryService.computeSalary(us);
       })
@@ -403,11 +408,11 @@ export class UserService implements UserNS.IUserService {
   }
 
   async getListUserWithSalaries(param: GetSalaryDto): Promise<PageDto<UserDto>> {
-    return  await this.userRepository.getListUserWithSalaries(param);
+    return await this.userRepository.getListUserWithSalaries(param);
   }
 
   async checkEmployeeExisted(param: CheckExitsEmployeeDto): Promise<Boolean> {
-    return  await this.userRepository.checkEmployeeExisted(param);
+    return await this.userRepository.checkEmployeeExisted(param);
   }
 
 }

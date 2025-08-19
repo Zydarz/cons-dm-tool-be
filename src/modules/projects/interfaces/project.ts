@@ -122,6 +122,7 @@ export namespace ProjectNS {
     getProjectForPm(email: string): Promise<ProjectDto[]>;
     getProjectOfUser(id: string): Promise<ProjectDto[]>;
     getProjectByUserId(id: string): Promise<TimeSheetProjectOfMemberDto[]>;
+    getAllProjectsForTimesheet(): Promise<TimeSheetProjectOfMemberDto[]> ;
     getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]>;
     getProject(filter: FilterProjectDto): Promise<ProjectDto | null>;
     updateCustomerIdInProjectRecords(customerId: number, t?: Transaction): Promise<SuccessResponseDto>;

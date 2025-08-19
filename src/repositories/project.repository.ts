@@ -393,6 +393,12 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
     return projects.map(project => new TimeSheetProjectOfMemberDto(project));
   }
 
+  async getAllProjectsForTimesheet(): Promise<TimeSheetProjectOfMemberDto[]> {
+    const projects = await this.projectEntity.findAll();
+    return projects.map(project => new TimeSheetProjectOfMemberDto(project));
+  }
+
+
   async getInfoAllProject(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<ProjectDto[]> {
     const condition: WhereOptions = {};
     let isNest = false;
