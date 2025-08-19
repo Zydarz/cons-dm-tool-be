@@ -55,10 +55,10 @@ export class GoogleGuard implements CanActivate {
 
     this.logger.debug(`User info fetched: ${email}`);
 
-    if (!email.includes(UserNS.DOMAIN_USER)) {
-      this.logger.warn(`Unauthorized domain for email: ${email}`);
-      throw UserNS.ERRORS.UserNotOmi;
-    }
+    // if (!email.includes(UserNS.DOMAIN_USER)) {
+    //   this.logger.warn(`Unauthorized domain for email: ${email}`);
+    //   throw UserNS.ERRORS.UserNotOmi;
+    // }
 
     const user = await this.userService.getUserByEmail(email);
     if (!user) {

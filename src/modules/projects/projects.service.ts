@@ -406,50 +406,24 @@ export class ProjectsService implements ProjectNS.IProjectService {
   }
 
   async getLogWorkByUserId(userId: string, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
-    //CheckuserId
+    let dataShow;
     var user = await this.userService.getUserById(userId);
-    if (user) {
-      // retrutn ở day
-    }
 
     const checkProject = this.validDataForTimesheet(logWorkFilterOptionsDto.projects);
     const checkMember = this.validDataForTimesheet(logWorkFilterOptionsDto.members);
 
-    //  console.log('checkProject',checkProject);
-    // console.log('checkMember',checkMember);
+    //console.log('checkProject', checkProject);
+    //      console.log('checkMember', checkMember);
 
+    if (!checkProject && !checkMember) {
 
-    if (checkProject && checkMember) {
-      //Chọn cả Project và Member
-    }
-    else if (checkProject && !checkMember) {
-      //Chọn Project nhưng không chọn Member
-    }
-    else if (!checkProject && checkMember) {
-      // Chọn Member nhưng không chọn Project
+      dataShow = await this.logWorkService.getLogWorkByUserId(user.id, logWorkFilterOptionsDto);
     }
     else {
-      // Không chọn cả Project và Member
-      // const projects = await this.projectRepository.getProjectByUserId(user.id);
-      // var projectsByPM = projects.filter(project =>
-      //   project.pm?.includes(`"${user.username}"`),
-      // );
-
-      // var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
-      // const timesheet: TimeSheetProjectDto = {
-      //   projects: projects || [],
-      //   members: members || [],
-      // };
-
-      var dataShow =  await this.logWorkService.getLogWorksMember(checkProject,checkMember, logWorkFilterOptionsDto);
-
-       console.log('dataShow',dataShow);
-
+      dataShow = await this.logWorkService.getLogWorksMember(checkMember, checkProject, logWorkFilterOptionsDto);
     }
-
-
-
-    return await this.logWorkService.getLogWorkByUserId(user.id, logWorkFilterOptionsDto);
+    //console.log('dataShow', dataShow);
+    return dataShow;
   }
 
 
@@ -462,7 +436,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
       .map(id => id.trim()) // Loại bỏ khoảng trắng ở đầu/cuối mỗi ID: ["101", "205", "300"]
       .filter(id => id !== ''); // Loại bỏ các ID rỗng nếu có (ví dụ: "101,,205")
 
-    return cleanedIds.length > 0 ? cleanedIds.join(',') : null;
+    return cleanedIds.length > 0 ? cleanedIds : null;
   }
 
   async getDetailLogWork(logWorkId: number): Promise<LogWorkDto> {

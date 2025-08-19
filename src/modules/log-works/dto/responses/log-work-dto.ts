@@ -14,6 +14,9 @@ export class LogWorkDto extends AbstractDto {
   @ApiPropertyOptional()
   readonly activity?: string;
 
+    @ApiPropertyOptional()
+  readonly projectName?: string;
+
   @ApiPropertyOptional()
   readonly dailyReportActivity?: DailyReportActivitiesDto;
 
@@ -34,6 +37,8 @@ export class LogWorkDto extends AbstractDto {
     this.userProjectId = logWorkEntity.userProjectId;
     this.reportDate = logWorkEntity.reportDate;
     this.activity = logWorkEntity.dailyReportActivity?.name;
+    this.projectName = logWorkEntity.userProject?.projects?.name;
+    
     this.dailyReportActivity = logWorkEntity.dailyReportActivity?.toDto();
     this.taskId = logWorkEntity.taskId;
     this.actualEffort = logWorkEntity.actualEffort;

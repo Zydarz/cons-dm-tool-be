@@ -217,6 +217,8 @@ async getLogWorksMember(
   projectIds: string[], // <-- 1. Thêm tham số projectIds
   logWorkFilterOptionsDto: LogWorkFilterOptionsDto,
 ): Promise<PageDto<LogWorkDto>> {
+
+
   // 2. Xây dựng điều kiện lọc cho bảng user_projects một cách linh hoạt
   const userProjectWhereConditions = {};
 
@@ -321,6 +323,8 @@ async getLogWorksMember(
   return items.toPageDto(pageMetaDto);
 }
 
+
+
   async getDetailLogWork(logWorkId: number): Promise<LogWorkEntity | null> {
     const userRelation = {
       model: UserEntity,
@@ -359,6 +363,7 @@ async getLogWorksMember(
       include: [userProjectRelation, dailyReportActivitiesRelation],
     });
   }
+
   async updateLogWork(logWork: LogWorkEntity, updateLogWorkDto: RequestLogWorkDto): Promise<SuccessResponseDto> {
     await logWork.update({
       reportDate: updateLogWorkDto.reportDate,
