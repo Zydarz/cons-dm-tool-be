@@ -20,16 +20,47 @@ export class LogWorksService implements LogWorkNS.ILogWorkService {
     @Inject('IUserProjectService') private readonly userProjectService: UserProjectNS.IUserProjectServices,
   ) { }
   async createLogWork(userProjectId: number, createLogWorkDto: CreateLogWorkDto): Promise<SuccessResponseDto> {
+    // Cache cho userProject để tránh query trùng lặp
+    const userProjectCache = new Map<number, any>();
+
     for (const logWorkDto of createLogWorkDto.logWorks) {
-      const { reportDate, actualEffort } = logWorkDto;
-      const userProject = await this.userProjectService.findById(userProjectId);
-      await this.logWorkRepository.createLogWork(userProjectId, logWorkDto);
-      await this.resourceSummaryService.addResourceSummaryWhenAddLogWork(
-        reportDate,
-        actualEffort,
-        userProject?.projectId,
-      );
+      const { reportDate, actualEffort, projectId: logWorkProjectId } = logWorkDto;
+
+      // Xác định userProjectId để sử dụng
+      let effectiveUserProjectId = userProjectId;
+      let effectiveProjectId: number;
+
+      if (logWorkProjectId) {
+        // Nếu logWork có projectId riêng, cần tìm userProject tương ứng
+        // (Logic này phụ thuộc vào cách bạn muốn handle multiple projects)
+        effectiveProjectId = logWorkProjectId;
+      } else {
+        // Lấy từ cache hoặc query userProject
+        let userProject = userProjectCache.get(userProjectId);
+        if (!userProject) {
+          userProject = await this.userProjectService.findById(userProjectId);
+          if (!userProject) {
+
+            return new SuccessResponseDto(false);
+          }
+          userProjectCache.set(userProjectId, userProject);
+        }
+        effectiveProjectId = userProject.projectId;
+      }
+
+      // Tạo logWork trong database
+      await this.logWorkRepository.createLogWork(effectiveUserProjectId, logWorkDto);
+
+      // Cập nhật resource summary
+      if (reportDate && actualEffort !== undefined) {
+        await this.resourceSummaryService.addResourceSummaryWhenAddLogWork(
+          reportDate,
+          actualEffort,
+          effectiveProjectId,
+        );
+      }
     }
+
     return new SuccessResponseDto(true);
   }
 

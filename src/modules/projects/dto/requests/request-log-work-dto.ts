@@ -25,6 +25,16 @@ export class RequestLogWorkDto {
   @Max(24)
   readonly actualEffort?: number;
 
+   @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  readonly projectId?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  readonly memberId?: string;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

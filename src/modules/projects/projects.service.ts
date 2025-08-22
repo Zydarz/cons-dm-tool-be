@@ -202,30 +202,55 @@ export class ProjectsService implements ProjectNS.IProjectService {
   async getProjectAndMemberForTimesheets(
     user: UserEntity,
   ): Promise<TimeSheetProjectDto> {
-    if (user.role === UserNS.Roles.ADMIN || user.role === UserNS.Roles.LOS) {
-      const projects = await this.projectRepository.getAllProjectsForTimesheet();
-      var members = await this.userService.getAllMembersForTimesheet();
-      const timesheet: TimeSheetProjectDto = {
-        projects: projects || [],
-        members: members || [],
-      };
+    let projects;
+    let members;
 
-      return timesheet;
+    if (user.role === UserNS.Roles.ADMIN || user.role === UserNS.Roles.LOS) {
+      projects = await this.projectRepository.getAllProjectsForTimesheet();
+      members = await this.userService.getAllMembersForTimesheet();
     }
     else {
-      const projects = await this.projectRepository.getProjectByUserId(user.id);
+      projects = await this.projectRepository.getProjectByUserId(user.id);
       var projectsByPM = projects.filter(project =>
         project.pm?.includes(`"${user.username}"`),
       );
 
-      var members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
-      const timesheet: TimeSheetProjectDto = {
-        projects: projects || [],
-        members: members || [],
-      };
-
-      return timesheet;
+      members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
     }
+
+    const memberMap = new Map();
+
+    members.forEach(member => {
+      if (memberMap.has(member.id)) {
+        memberMap.get(member.id).projectIds.push(member.projectIds);
+      } else {
+        memberMap.set(member.id, {
+          id: member.id,
+          createdAt: member.createdAt,
+          updatedAt: member.updatedAt,
+          email: member.email,
+          surName: member.surName,
+          username: member.username,
+          projectIds: [member.projectIds]
+        });
+      }
+    });
+
+    // console.log('memberMap', memberMap);
+
+    const modifiedMembers = Array.from(memberMap.values()).map(member => ({
+      ...member,
+      projectIds: member.projectIds.join(',')
+    }));
+
+    // console.log('modifiedMembers', modifiedMembers);
+
+    const timesheet: TimeSheetProjectDto = {
+      projects: projects || [],
+      members: modifiedMembers || [],
+    };
+
+    return timesheet;
 
   }
 
@@ -393,26 +418,88 @@ export class ProjectsService implements ProjectNS.IProjectService {
     createLogWorkDto: CreateLogWorkDto,
     user: UserEntity,
   ): Promise<SuccessResponseDto> {
-    const resrources = await this.resourceService.getResourceUserInProject(param);
-    const dates = resrources.map((res) => res.date.getTime());
-    const maxDate = new Date(Math.max(...dates));
-    if (
-      (isEmpty(resrources) && user.role !== UserNS.Roles.ADMIN) ||
-      (maxDate <= new Date() && (user.role === UserNS.Roles.MEMBER || user.role === UserNS.Roles.LOS))
-    ) {
-      throw new ForbiddenException();
+
+
+    if (param.projectId != 0) {
+      const resrources = await this.resourceService.getResourceUserInProject(param);
+      const dates = resrources.map((res) => res.date.getTime());
+      const maxDate = new Date(Math.max(...dates));
+      if (
+        (isEmpty(resrources) && user.role !== UserNS.Roles.ADMIN) ||
+        (maxDate <= new Date() && (user.role === UserNS.Roles.MEMBER || user.role === UserNS.Roles.LOS))
+      ) {
+        throw new ForbiddenException();
+      }
+      const userProject = await this.userProjectService.findUserProject(param);
+      let userProjectId = +0;
+      if (isNil(userProject)) {
+        const createUserProject = await this.userProjectService.createUserProject(param);
+        userProjectId = createUserProject.id;
+      } else {
+        userProjectId = userProject.id;
+      }
+      await this.logWorkService.createLogWork(userProjectId, createLogWorkDto);
     }
-    const userProject = await this.userProjectService.findUserProject(param);
-    let userProjectId = +0;
-    if (isNil(userProject)) {
-      const createUserProject = await this.userProjectService.createUserProject(param);
-      userProjectId = createUserProject.id;
-    } else {
-      userProjectId = userProject.id;
+    else {
+      // Xử lý từng logWork với projectId riêng biệt
+      const userProjectMap = new Map<number, number>(); // Map projectId -> userProjectId
+
+      for (const logWork of createLogWorkDto.logWorks) {
+        if (!logWork.projectId) {
+          return new SuccessResponseDto(false);
+        }
+
+        let userProjectId: number;
+
+        // Kiểm tra xem đã xử lý projectId này chưa
+        if (userProjectMap.has(logWork.projectId)) {
+          userProjectId = userProjectMap.get(logWork.projectId)!;
+        } else {
+          // Tạo param mới với projectId từ logWork
+          var logWorkParam: CreateUserProjectDto = {
+            ...param,
+            projectId: logWork.projectId,
+            userId: logWork.memberId ? logWork.memberId : param.userId,
+          };
+
+          // Kiểm tra quyền truy cập cho project này
+          const resources = await this.resourceService.getResourceUserInProject(logWorkParam);
+          const dates = resources.map((res) => res.date.getTime());
+          const maxDate = new Date(Math.max(...dates));
+
+          if (
+            (isEmpty(resources) && user.role !== UserNS.Roles.ADMIN) ||
+            (maxDate <= new Date() && (user.role === UserNS.Roles.MEMBER || user.role === UserNS.Roles.LOS))
+          ) {
+            throw new ForbiddenException(`Access denied for project ${logWork.projectId}`);
+          }
+
+
+          // Tìm hoặc tạo userProject cho projectId này
+          const userProject = await this.userProjectService.findUserProject(logWorkParam);
+          if (isNil(userProject)) {
+            const createUserProject = await this.userProjectService.createUserProject(logWorkParam);
+            userProjectId = createUserProject.id;
+          } else {
+            userProjectId = userProject.id;
+          }
+
+          // Lưu vào map để tránh xử lý lại
+          userProjectMap.set(logWork.projectId, userProjectId);
+        }
+
+        // Tạo logWork riêng lẻ cho từng item
+        const singleLogWorkDto: CreateLogWorkDto = {
+          logWorks: [logWork]
+        };
+
+        await this.logWorkService.createLogWork(userProjectId, singleLogWorkDto);
+      }
     }
-    await this.logWorkService.createLogWork(userProjectId, createLogWorkDto);
+
     return new SuccessResponseDto(true);
   }
+
 
   async getLogWork(projectId: number, logWorkFilterOptionsDto: LogWorkFilterOptionsDto): Promise<PageDto<LogWorkDto>> {
     return await this.logWorkService.getLogWork(projectId, logWorkFilterOptionsDto);
@@ -425,9 +512,6 @@ export class ProjectsService implements ProjectNS.IProjectService {
     const checkProject = this.validDataForTimesheet(logWorkFilterOptionsDto.projects);
     const checkMember = this.validDataForTimesheet(logWorkFilterOptionsDto.members);
 
-    //console.log('checkProject', checkProject);
-    //      console.log('checkMember', checkMember);
-
     if (!checkProject && !checkMember) {
 
       dataShow = await this.logWorkService.getLogWorkByUserId(user.id, logWorkFilterOptionsDto);
@@ -435,7 +519,6 @@ export class ProjectsService implements ProjectNS.IProjectService {
     else {
       dataShow = await this.logWorkService.getLogWorksMember(checkMember, checkProject, logWorkFilterOptionsDto);
     }
-    //console.log('dataShow', dataShow);
     return dataShow;
   }
 

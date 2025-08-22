@@ -10,6 +10,9 @@ import { default as UserSalariesEntity } from './user-salaries.entity';
 @Table({ modelName: 'user_projects' })
 @UseDto(UserProjectDto)
 export default class UserProjectEntity extends AbstractEntity<UserProjectDto> {
+  static find(arg0: { relations: string[]; }) {
+    throw new Error('Method not implemented.');
+  }
   @Column({ type: DataType.STRING })
   userId: string;
   @Column({ type: DataType.BIGINT })

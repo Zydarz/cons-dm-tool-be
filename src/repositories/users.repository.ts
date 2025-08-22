@@ -43,7 +43,8 @@ export class UsersRepository implements UserNS.IUserRepository {
   constructor(@Inject('UserEntity') private readonly userEntity: typeof UserEntity,
     @Inject('DepartmentEntity') private readonly departmentEntity: typeof DepartmentEntity,
     @Inject('ProjectEntity') private readonly projectEntity: typeof ProjectEntity,
-    @Inject('UserSalariesEntity') private readonly userSalariesEntity: typeof UserSalariesEntity
+    @Inject('UserSalariesEntity') private readonly userSalariesEntity: typeof UserSalariesEntity,
+    @Inject('UserProjectEntity') private readonly userProjectEntity: typeof UserProjectEntity
   ) { }
 
   async getUserMasterData(id: string): Promise<UserEntity> {
@@ -512,7 +513,7 @@ export class UsersRepository implements UserNS.IUserRepository {
       return [];
     }
 
-    const projects = await this.userEntity.findAll({
+    const users = await this.userEntity.findAll({
       include: [
         {
           model: UserProjectEntity,
@@ -526,15 +527,37 @@ export class UsersRepository implements UserNS.IUserRepository {
       ],
     });
 
-    return projects.map(project => new TimeSheetMemberDto(project));
-  }
-
-  async getAllMembersForTimesheet(): Promise<TimeSheetMemberDto[]> {
-    const users = await this.userEntity.findAll();
     return users.map(user => new TimeSheetMemberDto(user));
   }
 
 
+async getAllMembersForTimesheet(): Promise<TimeSheetMemberDto[]> {
+    const userProjects = await this.userProjectEntity.findAll({
+      include: [
+        {
+          model: this.userEntity,
+          as: 'users', // Đảm bảo alias này khớp với định nghĩa trong model
+          required: true,
+        },
+      ],
+    });
+
+    // Tạo một mảng rỗng để chứa kết quả
+    const results: TimeSheetMemberDto[] = [];
+
+    // Dùng vòng lặp for...of để duyệt qua kết quả
+    for (const up of userProjects) {
+      // Kiểm tra một cách tường minh xem 'up.users' có tồn tại hay không
+      if (up.users) {
+        // BÊN TRONG KHỐI LỆNH IF NÀY:
+        // TypeScript hiểu 100% rằng 'up.users' không thể là null hoặc undefined.
+        // Vì vậy, lỗi sẽ không còn nữa.
+        results.push(new TimeSheetMemberDto(up.users, up.projectId.toString()));
+      }
+    }
+
+    return results;
+}
 
   async countUser(role: UserNS.Roles, dto: FilterUserAllowcationDto): Promise<number> {
     const { userIds, userId, projectIds } = dto;
@@ -565,6 +588,7 @@ export class UsersRepository implements UserNS.IUserRepository {
     });
     return user.length;
   }
+  
   async createUser(param: CreateUserDto): Promise<UserEntity> {
     try {
       const dataInsert = {
