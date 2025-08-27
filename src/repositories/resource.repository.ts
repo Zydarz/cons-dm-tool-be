@@ -838,52 +838,52 @@ export class ResourceRepository implements ResourceNS.IResourceRepository {
     return userIds;
   }
 
-  async getResourcePms(userProjectIds: number[]): Promise<ResourceEntity[]> {
-    const condition = {
-      userProjectId: { [Op.in]: userProjectIds },
-      positionId: 1,
-    };
+async getResourcePms(userProjectIds: number[]): Promise<ResourceEntity[]> {
+  const condition = {
+    userProjectId: { [Op.in]: userProjectIds },
+    positionId: 1,
+  };
 
-    const resources = await this.resourceEntity.findAll({
-      where: condition,
-      attributes: [
-        'id',
-        'userProjectId',
-        'positionId',
-        'date',
-        'createdAt',
-        'updatedAt',
-      ],
-      include: [
-        {
-          model: UserProjectEntity,
-          as: 'userProject',
-          required: true,
-          attributes: ['id', 'userId', 'projectId', 'createdAt', 'updatedAt'],
-          include: [
-            {
-              model: UserEntity,
-              as: 'users', // ✅ đúng alias đã định nghĩa
-              attributes: ['id', 'mail', 'displayName', 'status', 'createdAt', 'updatedAt'], // ✅ dùng đúng tên cột trong model
-            },
-          ],
-        },
-      ],
-      order: [['date', 'ASC']],
-    });
-    
-    
-    
-    // Tự group trong JS (nếu cần)
-    const grouped = {}; // hoặc dùng lodash groupBy, tùy bạn
-    for (const r of resources) {
-      const key = `${r.userProjectId}-${r.positionId}`;
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(r);
-    }
-    
-    return resources;
-  }
+  const resources = await this.resourceEntity.findAll({
+    where: condition,
+    attributes: [
+      'id',
+      'userProjectId', 
+      'positionId',
+      'date',
+      'createdAt',
+      'updatedAt',
+    ],
+    include: [
+      {
+        model: UserProjectEntity,
+        as: 'userProject',
+        required: true,
+        attributes: ['id', 'userId', 'projectId', 'createdAt', 'updatedAt'],
+        include: [
+          {
+            model: UserEntity,
+            as: 'users',
+            required: false,
+            attributes: ['id', 'mail', 'displayName','username', 'status', 'createdAt', 'updatedAt'],
+          },
+          {
+            model: ProjectEntity,
+            as: 'projects', 
+            required: false,
+            attributes: ['id', 'name', 'createdAt', 'updatedAt'], // Giả sử ProjectEntity có field 'name'
+          },
+        ],
+      },
+    ],
+    order: [['date', 'ASC']],
+    raw: false, // ✅ Quan trọng: phải là false để có nested objects
+    nest: true,  // ✅ Quan trọng: để có cấu trúc nested
+  });
+
+
+  return resources;
+}
 
   async deletetAllResourceByUserProjectIds(userProjectIds: number[], t?: Transaction): Promise<SuccessResponseDto> {
     await this.resourceEntity.update(

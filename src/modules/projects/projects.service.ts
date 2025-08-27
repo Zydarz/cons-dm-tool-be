@@ -40,6 +40,7 @@ import { PaymentNS } from '../../modules/payment-tracking/interfaces/payment-tra
 import { MasterDataNS } from '../../modules/master-data/master-data';
 import { Util } from '../../common/util';
 import { TimeSheetProjectDto } from './dto/responses/timesheet-project-dto';
+import { TimeSheetMemberDto } from '../../modules/users/dto/response/user-project-dto';
 @Injectable()
 export class ProjectsService implements ProjectNS.IProjectService {
   constructor(
@@ -125,10 +126,14 @@ export class ProjectsService implements ProjectNS.IProjectService {
               return [];
             }),
           );
+
           userProjectIdPms = userProjectIdPms.filter((e) => !isEmpty(e)).flat();
           const listResourcePm = await this.resourceService.getResourcePms(userProjectIdPms);
 
-          const pms = listResourcePm.map((e) => e.userProject?.users?.username ?? '');
+          const pms = listResourcePm
+            .map((e) => e.userProject?.users?.username)
+            .filter(username => username && username.trim() !== '');
+
           p.pm = JSON.stringify(pms);
         }
 
@@ -215,7 +220,13 @@ export class ProjectsService implements ProjectNS.IProjectService {
         project.pm?.includes(`"${user.username}"`),
       );
 
-      members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
+      if (projectsByPM.length === 0) {
+        const member = new TimeSheetMemberDto(user, projects[0]?.id.toString());
+        members = [member];
+      }
+      else {
+        members = await this.userService.getMemberByProjectId(projectsByPM.map(p => p.id));
+      }
     }
 
     const memberMap = new Map();
