@@ -6,6 +6,8 @@ import {
   DepartmentDto,
   JobRankDto,
   LineDto,
+  ProjectStatusBiddingDto,
+  ProjectStatusDevelopmentDto,
   ProjectRankDto,
   SettingOtherCostDto,
 } from './dtos/master-data.dto';
@@ -22,6 +24,8 @@ import { default as ProjectRankEntity } from '../../entities/project-rank.entity
 import { default as SettingOtherCostEntity } from '../../entities/setting-other-cost.entity';
 import { CreateSettingOtherCostDto } from './dtos/requests/create-setting-other-cost.dto';
 import { FilterDepartmentDto } from './dtos/requests/filter-department.dto';
+import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
+import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
 
 export namespace MasterDataNS {
   export interface IMasterDataService {
@@ -40,6 +44,8 @@ export namespace MasterDataNS {
     getMasterDataDepartment(id: number): Promise<DepartmentDto>;
     getMasterDataLine(id: number): Promise<LineDto>;
     checkProjectRank(id: number): Promise<ProjectRankDto | null>;
+    checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingDto | null>;
+    checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentDto | null>;
     checkOtherCost(id: number): Promise<SettingOtherCostDto | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
     createSettingOtherCost(param: CreateSettingOtherCostDto): Promise<SuccessResponseDto>;
@@ -61,6 +67,8 @@ export namespace MasterDataNS {
     getMasterDataJobRank(id: number): Promise<JobRankEntity>;
     getMasterDataLine(id: number): Promise<DepartmentEntity>;
     checkProjectRank(id: number): Promise<ProjectRankEntity | null>;
+    checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingEntity | null>;
+    checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentEntity | null>;
     checkSettingOtherCose(id: number): Promise<SettingOtherCostEntity | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
     createSettingOtherCost(param: CreateSettingOtherCostDto): Promise<SuccessResponseDto>;
@@ -73,6 +81,8 @@ export namespace MasterDataNS {
     daily_report_activities = 'Daily Report Activities',
     job_rank = 'Job Rank',
     project_rank = 'Project Rank',
+    project_status_bidding = 'Project Status Bidding',
+    project_status_development = 'Project Status Development',
     setting_other_cost = 'Cost Setting',
   }
 
@@ -83,6 +93,8 @@ export namespace MasterDataNS {
     daily_report_activities = 'daily_report_activities',
     job_rank = 'job_rank',
     project_rank = 'project_rank',
+    project_status_bidding = 'project_status_bidding',
+    project_status_development = 'project_status_development',
     setting_other_cost = 'setting_other_cost',
   }
   export const ERRORS = {
@@ -91,6 +103,8 @@ export namespace MasterDataNS {
     DontDeleteDepartment: new ForbiddenException('Unable to delete departments containing members or projects!'),
     DepartmentExisted: new ConflictException('Department Name Existed '),
     ProjectRankNotFound: new NotFoundException('Project rank is not exists!'),
+    ProjectStatusBiddingNotFound: new NotFoundException('Project status bidding is not exists!'),
+    ProjectStatusDevelopmentNotFound: new NotFoundException('Project status development is not exists!'),
     SettingOtherCostNotFound: new NotFoundException('Other Cost is not exists!'),
     SettingOtherCostExisted: new ConflictException('Other Cost Name Existed '),
   };

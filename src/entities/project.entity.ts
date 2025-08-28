@@ -10,10 +10,13 @@ import { default as PaymentEntity } from './payment-tracking.entity';
 import { default as ContractTypeEntity } from './contract-type.entity';
 import { default as CustomerEntity } from './customer.entity';
 import { default as DepartmentEntity } from './department.entity';
+import { default as ProjectStatusBiddingEntity } from './project-status-bidding.entity';
+import { default as ProjectStatusDevelopmentEntity } from './project-status-development.entity';
 
 const TYPE = ProjectNS.Type;
 const CURRENCY = ProjectNS.Currency;
 const STATUS = ProjectNS.Status;
+
 @Table({ modelName: 'projects' })
 @UseDto(ProjectDto)
 export default class ProjectEntity extends AbstractEntity<ProjectDto> {
@@ -26,7 +29,7 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: DataType.STRING })
   code: string;
 
-  @Column({ type: DataType.ENUM(TYPE.LABO, TYPE.FIXED) })
+  @Column({ type: DataType.STRING})
   type: ProjectNS.Type;
 
   @Column({ type: DataType.TEXT })
@@ -68,9 +71,26 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: DataType.DOUBLE })
   externalPrice?: number;
 
+  // Các trường mới được thêm
+  @Column({ type: DataType.STRING, allowNull: true })
+  backLogId?: string;
+
+  @Column({ type: DataType.TEXT, allowNull: true })
+  techStack?: string;
+
+  @Column({ type: DataType.TEXT, allowNull: true })
+  market?: string;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  statusBidding?: number;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  statusDevelopment?: number;
+
   @DeletedAt
   deletedAt: Date;
 
+  // Existing relationships
   @HasMany(() => UserProjectEntity, 'projectId')
   userProjects?: UserProjectEntity[];
 
@@ -94,4 +114,11 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
 
   @BelongsTo(() => DepartmentEntity, 'departmentId')
   department: DepartmentEntity;
+
+  // Thêm relationships mới cho status bidding và development
+  @BelongsTo(() => ProjectStatusBiddingEntity, 'statusBidding')
+  projectStatusBidding?: ProjectStatusBiddingEntity;
+
+  @BelongsTo(() => ProjectStatusDevelopmentEntity, 'statusDevelopment')
+  projectStatusDevelopment?: ProjectStatusDevelopmentEntity;
 }

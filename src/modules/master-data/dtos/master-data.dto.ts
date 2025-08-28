@@ -9,6 +9,8 @@ import { default as PositionEntity } from '../../../entities/position.entity';
 import { default as ContractTypeEntity } from '../../../entities/contract-type.entity';
 import { default as DepartmentEntity } from '../../../entities/department.entity';
 import { default as SettingOtherCostEntity } from '../../../entities/setting-other-cost.entity';
+import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
+import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
 
 export class MasterDataDto extends AbstractDto {
   @ApiProperty()
@@ -84,6 +86,24 @@ export class ProjectRankDto extends MasterDataDto {
     this.order = entity.order;
   }
 }
+
+
+export class ProjectStatusBiddingDto extends MasterDataDto {
+  constructor(entity: ProjectStatusBiddingEntity) {
+    super(entity);
+    this.name = entity.name;
+    this.order = entity.order;
+  }
+}
+
+export class ProjectStatusDevelopmentDto extends MasterDataDto {
+  constructor(entity: ProjectStatusDevelopmentEntity) {
+    super(entity);
+    this.name = entity.name;
+    this.order = entity.order;
+  }
+}
+
 
 export class PositionDto extends MasterDataDto {
   constructor(entity: PositionEntity) {

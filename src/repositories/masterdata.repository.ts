@@ -29,10 +29,15 @@ import sequelize from 'sequelize';
 import { count } from 'console';
 import { CreateSettingOtherCostDto } from '../modules/master-data/dtos/requests/create-setting-other-cost.dto';
 import { FilterDepartmentDto } from '../modules/master-data/dtos/requests/filter-department.dto';
+import { default as ProjectStatusBiddingEntity } from '../entities/project-status-bidding.entity';
+import { default as ProjectStatusDevelopmentEntity } from '../entities/project-status-development.entity';
+
 export class MasterDataRepository implements MasterDataNS.IMasterDataRepository {
   constructor(
     @Inject(ContractTypeEntity.name) private readonly contractTypeEntity: typeof ContractTypeEntity,
     @Inject(ProjectRankEntity.name) private readonly projectRankEntity: typeof ProjectRankEntity,
+    @Inject(ProjectStatusBiddingEntity.name) private readonly projectStatusBiddingEntity: typeof ProjectStatusBiddingEntity,
+    @Inject(ProjectStatusDevelopmentEntity.name) private readonly projectStatusDevelopmentEntity: typeof ProjectStatusDevelopmentEntity,
     @Inject(JobRankEntity.name) private readonly jobRankEntity: typeof JobRankEntity,
     @Inject(DailyReportActivitiesEntity.name)
     private readonly dailyReportActivitiesEntity: typeof DailyReportActivitiesEntity,
@@ -40,7 +45,7 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
     @Inject(LineEntity.name) private readonly lineEntity: typeof LineEntity,
     @Inject(DepartmentEntity.name) private readonly departmentEntity: typeof DepartmentEntity,
     @Inject(SettingOtherCostEntity.name) private readonly settingOtherCostEntity: typeof SettingOtherCostEntity,
-  ) {}
+  ) { }
 
   async getMasterDataList(
     type: MasterDataNS.MasterDataCodeList,
@@ -83,6 +88,28 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         count = await this.projectRankEntity.count();
         break;
 
+      case MasterDataNS.MasterDataCodeList.project_status_bidding:
+        rows = (
+          await this.projectStatusBiddingEntity.findAll({
+            order: [['order', dto.order]],
+            limit: dto.take,
+            offset: dto.skip,
+          })
+        ).toDtos();
+        count = await this.projectStatusBiddingEntity.count();
+        break;
+
+      case MasterDataNS.MasterDataCodeList.project_status_development:
+        rows = (
+          await this.projectStatusDevelopmentEntity.findAll({
+            order: [['order', dto.order]],
+            limit: dto.take,
+            offset: dto.skip,
+          })
+        ).toDtos();
+        count = await this.projectStatusDevelopmentEntity.count();
+        break;
+
       case MasterDataNS.MasterDataCodeList.job_rank:
         rows = (
           await this.jobRankEntity.findAll({
@@ -116,16 +143,16 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         count = await this.positionEntity.count();
         break;
 
-        case MasterDataNS.MasterDataCodeList.setting_other_cost:
-          rows = (
-            await this.settingOtherCostEntity.findAll({
-              order: [['order', dto.order]],
-              limit: dto.take,
-              offset: dto.skip,
-            })
-          ).toDtos();
-          count = await this.settingOtherCostEntity.count();
-          break;
+      case MasterDataNS.MasterDataCodeList.setting_other_cost:
+        rows = (
+          await this.settingOtherCostEntity.findAll({
+            order: [['order', dto.order]],
+            limit: dto.take,
+            offset: dto.skip,
+          })
+        ).toDtos();
+        count = await this.settingOtherCostEntity.count();
+        break;
     }
 
     const pageMetaDto = new PageMetaDto({ itemCount: count, pageOptionsDto: dto });
@@ -147,11 +174,17 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         case MasterDataNS.MasterDataCodeList.project_rank:
           return this.projectRankEntity.create({ ...data });
 
+        case MasterDataNS.MasterDataCodeList.project_status_bidding:
+          return this.projectStatusBiddingEntity.create({ ...data });
+
+        case MasterDataNS.MasterDataCodeList.project_status_development:
+          return this.projectStatusDevelopmentEntity.create({ ...data });
+
         case MasterDataNS.MasterDataCodeList.line:
-          return this.lineEntity.create({ ...data, flag_protected : 0 });
+          return this.lineEntity.create({ ...data, flag_protected: 0 });
 
         case MasterDataNS.MasterDataCodeList.project_role:
-          return this.positionEntity.create({ ...data, flag_protected : 0 });
+          return this.positionEntity.create({ ...data, flag_protected: 0 });
 
         case MasterDataNS.MasterDataCodeList.setting_other_cost:
           return this.settingOtherCostEntity.create({ ...data });
@@ -174,21 +207,27 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         case MasterDataNS.MasterDataCodeList.project_rank:
           return this.projectRankEntity.update({ ...data }, { where: { id: data.id } });
 
+        case MasterDataNS.MasterDataCodeList.project_status_bidding:
+          return this.projectStatusBiddingEntity.update({ ...data }, { where: { id: data.id } });
+
+        case MasterDataNS.MasterDataCodeList.project_status_development:
+          return this.projectStatusDevelopmentEntity.update({ ...data }, { where: { id: data.id } });
+
         case MasterDataNS.MasterDataCodeList.line:
-          if(dataDB[data.id]?.flag_protected == FLAG_PROTECTED) {
+          if (dataDB[data.id]?.flag_protected == FLAG_PROTECTED) {
             data.name = dataDB[data.id]?.name;
           }
           return this.lineEntity.update({ ...data }, { where: { id: data.id } });
 
         case MasterDataNS.MasterDataCodeList.project_role:
-          if(dataDB[data.id]?.flag_protected == FLAG_PROTECTED) {
+          if (dataDB[data.id]?.flag_protected == FLAG_PROTECTED) {
             delete data.code;
             data.name = dataDB[data.id]?.name;
           }
           return this.positionEntity.update({ ...data }, { where: { id: data.id } });
 
         case MasterDataNS.MasterDataCodeList.setting_other_cost:
-          if(!isNil(dataDB[data.id])) {
+          if (!isNil(dataDB[data.id])) {
             return this.settingOtherCostEntity.update({ ...data }, { where: { id: data.id } });
           }
           return false;
@@ -214,31 +253,41 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         case MasterDataNS.MasterDataCodeList.project_rank:
           return this.projectRankEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
 
+        case MasterDataNS.MasterDataCodeList.project_status_bidding:
+          return this.projectStatusBiddingEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
+
+        case MasterDataNS.MasterDataCodeList.project_status_development:
+          return this.projectStatusDevelopmentEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
+
         case MasterDataNS.MasterDataCodeList.line:
-          if(dataDB[data.id]?.users == 0) {
-            return this.lineEntity.update({ deletedAt: new Date() }, { where: {
-              [Op.and]: {
-                id: data.id,
-                flag_protected:  { [Op.ne]: FLAG_PROTECTED },
-              },
-            }, returning: true });
+          if (dataDB[data.id]?.users == 0) {
+            return this.lineEntity.update({ deletedAt: new Date() }, {
+              where: {
+                [Op.and]: {
+                  id: data.id,
+                  flag_protected: { [Op.ne]: FLAG_PROTECTED },
+                },
+              }, returning: true
+            });
           }
           break;
 
         case MasterDataNS.MasterDataCodeList.project_role:
-          if(dataDB[data.id]?.resources == 0) {
-            return this.positionEntity.update({ deletedAt: new Date() }, { where: {
+          if (dataDB[data.id]?.resources == 0) {
+            return this.positionEntity.update({ deletedAt: new Date() }, {
+              where: {
                 [Op.and]: {
                   id: data.id,
-                  flag_protected:  { [Op.ne]: FLAG_PROTECTED },
+                  flag_protected: { [Op.ne]: FLAG_PROTECTED },
                 },
               }
-              , returning: true });
+              , returning: true
+            });
           }
           break;
 
         case MasterDataNS.MasterDataCodeList.setting_other_cost:
-          if(!isNil(dataDB[data.id])) {
+          if (!isNil(dataDB[data.id])) {
             return this.settingOtherCostEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
           }
           return false;
@@ -254,14 +303,14 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         const lines = await this.lineEntity.findAll({
           attributes: ['id', 'name', 'flag_protected'],
           where: {
-            'deletedAt' : null
+            'deletedAt': null
           },
           include: [
             {
               model: UserEntity,
               attributes: ['id'],
               where: {
-                'deletedAt' : null
+                'deletedAt': null
               },
               required: false,
             },
@@ -269,76 +318,76 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         });
         lines.forEach((item, index) => {
           dataDB[item.id] = {
-            id : item.id,
-            name : item.name,
-            flag_protected : item.flag_protected,
-            users : item.users.length,
+            id: item.id,
+            name: item.name,
+            flag_protected: item.flag_protected,
+            users: item.users.length,
           };
         })
         break;
 
-        case MasterDataNS.MasterDataCodeList.project_role:
-          const positions = await this.positionEntity.findAll({
-            attributes: ['id', 'name', 'code', 'flag_protected'],
-            where: {
-              'deletedAt' : null
+      case MasterDataNS.MasterDataCodeList.project_role:
+        const positions = await this.positionEntity.findAll({
+          attributes: ['id', 'name', 'code', 'flag_protected'],
+          where: {
+            'deletedAt': null
+          },
+          include: [
+            {
+              model: ResourceEntity,
+              attributes: ['id'],
+              where: {
+                'deletedAt': null
+              },
+              required: false,
             },
-            include: [
-              {
-                model: ResourceEntity,
-                attributes: ['id'],
-                where: {
-                  'deletedAt' : null
-                },
-                required: false,
-              },
-            ],
-          });
+          ],
+        });
 
-          positions.forEach((item, index) => {
+        positions.forEach((item, index) => {
+          dataDB[item.id] = {
+            id: item.id,
+            name: item.name,
+            code: item.code,
+            flag_protected: item.flag_protected,
+            resources: item.resources.length,
+          };
+        })
+        break;
+
+      case MasterDataNS.MasterDataCodeList.setting_other_cost:
+        const listOtherCost = await this.settingOtherCostEntity.findAll({
+          attributes: ['id', 'name'],
+          include: [
+            {
+              model: OtherCostEntity,
+              attributes: ['id'],
+              required: false,
+            },
+          ]
+        });
+        listOtherCost.forEach((item, index) => {
+          if (item.other_cost.length === 0) {
             dataDB[item.id] = {
-              id : item.id,
-              name : item.name,
-              code : item.code,
-              flag_protected : item.flag_protected,
-              resources : item.resources.length,
+              id: item.id,
+              order: item.order
             };
-          })
-          break;
-
-        case MasterDataNS.MasterDataCodeList.setting_other_cost:
-          const listOtherCost = await this.settingOtherCostEntity.findAll({
-            attributes: ['id', 'name'],
-            include: [
-              {
-                model: OtherCostEntity,
-                attributes: ['id'],
-                required: false,
-              },
-            ]
-          });
-          listOtherCost.forEach((item, index) => {
-            if (item.other_cost.length === 0) {
-              dataDB[item.id] = {
-                id : item.id,
-                order : item.order
-              };
-            } else {
-              dataDB[item.id] = {
-                id : item.id,
-                name : item.name,
-                order : item.order
-              };
-              if(dto.deletedData) {
-                dto.deletedData.forEach((itemD, index) => {
-                  if (itemD.id === item.id) {
-                    delete dto.deletedData[index];
-                  }
-                });
-              }
+          } else {
+            dataDB[item.id] = {
+              id: item.id,
+              name: item.name,
+              order: item.order
+            };
+            if (dto.deletedData) {
+              dto.deletedData.forEach((itemD, index) => {
+                if (itemD.id === item.id) {
+                  delete dto.deletedData[index];
+                }
+              });
             }
-          });
-          break;
+          }
+        });
+        break;
     }
     const isCreated = this.handleCreatedMasterData(dto.type, dto.createdData);
     const isUpdated = this.handleUpdateMasterData(dto.type, dto.updatedData, dataDB);
@@ -359,6 +408,8 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       countDailyReportActivitiesOp,
       countJobRankOp,
       countProjectRankOp,
+      countProjectStatusBiddingOp,
+      countProjectStatusDevelopmentOp,
       countsettingOtherCostOp,
     ] = await Promise.all([
       this.positionEntity.count(),
@@ -367,6 +418,8 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       this.dailyReportActivitiesEntity.count(),
       this.jobRankEntity.count(),
       this.projectRankEntity.count(),
+      this.projectStatusBiddingEntity.count(),
+      this.projectStatusDevelopmentEntity.count(),
       this.settingOtherCostEntity.count(),
     ]);
     const projectRoleOp: MasterDataOptionDto = {
@@ -399,13 +452,24 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       countOptions: countProjectRankOp,
       code: MasterDataNS.MasterDataCodeList.project_rank,
     };
+    const projectStatusBiddingOp: MasterDataOptionDto = {
+      dataType: MasterDataNS.MasterDataList.project_status_bidding,
+      countOptions: countProjectStatusBiddingOp,
+      code: MasterDataNS.MasterDataCodeList.project_status_bidding,
+    };
+    const projectStatusDevelopmentOp: MasterDataOptionDto = {
+      dataType: MasterDataNS.MasterDataList.project_status_development,
+      countOptions: countProjectStatusDevelopmentOp,
+      code: MasterDataNS.MasterDataCodeList.project_status_development,
+    };
     const settingOtherCostOp: MasterDataOptionDto = {
       dataType: MasterDataNS.MasterDataList.setting_other_cost,
       countOptions: countsettingOtherCostOp,
       code: MasterDataNS.MasterDataCodeList.setting_other_cost,
     };
-    return [projectRoleOp, lineOp, contractTypeOp, dailyReportActivitiesOp, jobRankOp, projectRankOp, settingOtherCostOp];
+    return [projectRoleOp, lineOp, contractTypeOp, dailyReportActivitiesOp, jobRankOp, projectRankOp, projectStatusBiddingOp, projectStatusDevelopmentOp, settingOtherCostOp];
   }
+
   async getMasterDateContractType(id: number): Promise<ContractTypeEntity> {
     const contractType = await this.contractTypeEntity.findByPk(id);
     if (isNil(contractType)) {
@@ -439,7 +503,7 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
   }
 
   async getDepartment(params: FilterDepartmentDto): Promise<DepartmentEntity[]> {
-    const department = await this.departmentEntity.findAll({ order: [[params.orderField??'createdAt', params.orderType??'DESC']] });
+    const department = await this.departmentEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
     return department;
   }
 
@@ -450,9 +514,10 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         throw MasterDataNS.ERRORS.DepartmentExisted;
       }
     });
-    const department = await this.departmentEntity.create({ ...param, flag_protected : 0 });
+    const department = await this.departmentEntity.create({ ...param, flag_protected: 0 });
     return department;
   }
+
   async updateDepartment(id: number, param: UpdateDepartmentDto): Promise<DepartmentEntity> {
     const department = await this.departmentEntity.findByPk(id);
     if (isNil(department)) {
@@ -463,46 +528,48 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
 
     return department;
   }
+
   async deleteDepartment(id: number): Promise<SuccessResponseDto> {
     const department = await this.departmentEntity.findAll({
       attributes: ['id', 'flag_protected'],
       where: {
-        'id' : id,
-        'deletedAt' : null
+        'id': id,
+        'deletedAt': null
       },
       include: [
         {
           model: UserEntity,
           attributes: ['id'],
           where: {
-            'deletedAt' : null
+            'deletedAt': null
           },
           required: false,
         },
       ],
     });
 
-    let dataDB:any = [];
+    let dataDB: any = [];
     department.forEach((item, index) => {
       dataDB[item.id] = {
-        id : item.id,
-        flag_protected : item.flag_protected,
-        users : item.users.length,
+        id: item.id,
+        flag_protected: item.flag_protected,
+        users: item.users.length,
       };
     })
 
-    if(dataDB[id].flag_protected !== FLAG_PROTECTED && dataDB[id].users == 0) {
+    if (dataDB[id].flag_protected !== FLAG_PROTECTED && dataDB[id].users == 0) {
       await this.departmentEntity.destroy({
         where: { id },
       });
     }
 
-
     return new SuccessResponseDto(true);
   }
+
   async checkProjectRank(id: number): Promise<ProjectRankEntity | null> {
     return await this.projectRankEntity.findByPk(id);
   }
+
   async checkSettingOtherCose(id: number): Promise<SettingOtherCostEntity | null> {
     return await this.settingOtherCostEntity.findByPk(id);
   }
@@ -520,7 +587,16 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         throw MasterDataNS.ERRORS.DepartmentExisted;
       }
     });
-    await this.settingOtherCostEntity.create({ ...params, flag_protected : 0, order: maxOrder });
+    await this.settingOtherCostEntity.create({ ...params, flag_protected: 0, order: maxOrder });
     return new SuccessResponseDto(true);
+  }
+
+  // Thêm 2 methods bị thiếu để implement interface
+  async checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingEntity | null> {
+    return await this.projectStatusBiddingEntity.findByPk(id);
+  }
+
+  async checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentEntity | null> {
+    return await this.projectStatusDevelopmentEntity.findByPk(id);
   }
 }

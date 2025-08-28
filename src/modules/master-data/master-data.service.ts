@@ -9,6 +9,8 @@ import {
   JobRankDto,
   LineDto,
   MasterDataDto,
+  ProjectStatusBiddingDto,
+  ProjectStatusDevelopmentDto,
   ProjectRankDto,
   SettingOtherCostDto,
 } from './dtos/master-data.dto';
@@ -27,7 +29,7 @@ export class MasterDataService implements MasterDataNS.IMasterDataService {
     @Inject('IMasterDataRepository') private readonly masterDataRepo: MasterDataNS.IMasterDataRepository,
     @Inject('IProjectService') private readonly projectService: ProjectNS.IProjectService,
     @Inject('IUserService') private readonly userService: UserNS.IUserService,
-  ) {}
+  ) { }
 
   async getMasterDataList(
     type: MasterDataNS.MasterDataCodeList,
@@ -95,6 +97,14 @@ export class MasterDataService implements MasterDataNS.IMasterDataService {
 
   async checkProjectRank(id: number): Promise<ProjectRankDto | null> {
     return await this.masterDataRepo.checkProjectRank(id);
+  }
+
+  async checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingDto | null> {
+    return await this.masterDataRepo.checkProjectStatusBidding(id);
+  }
+
+  async checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentDto | null> {
+    return await this.masterDataRepo.checkProjectStatusDevelopment(id);
   }
   async checkOtherCost(id: number): Promise<SettingOtherCostDto | null> {
     return await this.masterDataRepo.checkSettingOtherCose(id);

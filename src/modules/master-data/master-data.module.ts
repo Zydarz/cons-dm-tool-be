@@ -14,6 +14,9 @@ import { RoleModule } from '../../modules/roles/role.module';
 import UserEntity from '../../entities/users.entity';
 import projectEntity from '../../entities/project.entity';
 import { default as SettingOtherCostEntity } from '../../entities/setting-other-cost.entity';
+import { default as ProjectStatusBiddingEntity } from '../../entities/project-status-bidding.entity';
+import { default as ProjectStatusDevelopmentEntity } from '../../entities/project-status-development.entity';
+
 
 const providers = [
   {
@@ -31,6 +34,14 @@ const providers = [
   {
     provide: ProjectRankEntity.name,
     useValue: ProjectRankEntity,
+  },
+    {
+    provide: ProjectStatusBiddingEntity.name,
+    useValue: ProjectStatusBiddingEntity,
+  },
+  {
+    provide: ProjectStatusDevelopmentEntity.name,
+    useValue: ProjectStatusDevelopmentEntity,
   },
   {
     provide: JobRankEntity.name,

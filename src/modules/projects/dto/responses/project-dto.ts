@@ -8,7 +8,7 @@ import { ResourceSummaryDto } from '../../../resource-summaries/dtos/resource-su
 import { UserDto } from '../../../../modules/users/dto/response/user-dto';
 import { UserNS } from '../../../../modules/users/interface/users';
 import { default as UserEntity } from '../../../../entities/users.entity';
-import { ContractTypeDto, DepartmentDto } from '../../../master-data/dtos/master-data.dto';
+import { ContractTypeDto, DepartmentDto, MasterDataDto } from '../../../master-data/dtos/master-data.dto';
 import { CustomerDto } from '../../../customers/dto/responses/customer-dto';
 
 export class ProjectDto extends AbstractDto {
@@ -94,6 +94,28 @@ export class ProjectDto extends AbstractDto {
   @ApiPropertyOptional()
   channelId?: string;
 
+  // Các trường mới được thêm
+  @ApiPropertyOptional()
+  @IsOptional()
+  backLogId?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  techStack?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  market?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  statusBidding?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  statusDevelopment?: number;
+
+  // Existing relationships
   @ApiPropertyOptional({ type: () => ContractTypeDto })
   contractType?: ContractTypeDto;
 
@@ -105,6 +127,13 @@ export class ProjectDto extends AbstractDto {
 
   @ApiPropertyOptional()
   customer?: CustomerDto;
+
+  // Thêm relationships mới cho status bidding và development
+  @ApiPropertyOptional({ type: () => MasterDataDto })
+  projectStatusBidding?: MasterDataDto;
+
+  @ApiPropertyOptional({ type: () => MasterDataDto })
+  projectStatusDevelopment?: MasterDataDto;
 
   constructor(project: ProjectEntity, resourceSummary?: ResourceSummaryDto, user?: UserEntity[]) {
     super(project);
@@ -133,5 +162,16 @@ export class ProjectDto extends AbstractDto {
     this.user = UserNS.dtos.toUserDtos(user);
     this.channelId = project.botSetting?.channelId;
     this.groupId = project.botSetting?.groupId;
+
+    // Gán giá trị cho các trường mới
+    this.backLogId = project.backLogId;
+    this.techStack = project.techStack;
+    this.market = project.market;
+    this.statusBidding = project.statusBidding;
+    this.statusDevelopment = project.statusDevelopment;
+
+    // Gán giá trị cho relationships mới
+    this.projectStatusBidding = project.projectStatusBidding?.toDto();
+    this.projectStatusDevelopment = project.projectStatusDevelopment?.toDto();
   }
 }
