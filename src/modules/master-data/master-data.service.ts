@@ -99,6 +99,17 @@ export class MasterDataService implements MasterDataNS.IMasterDataService {
     return await this.masterDataRepo.checkProjectRank(id);
   }
 
+  async getProjectStatusBidding(params: FilterDepartmentDto): Promise<ProjectStatusBiddingDto[]> {
+    const projectStatus = await this.masterDataRepo.getProjectStatusBidding(params);
+    return projectStatus.toDtos();
+  }
+
+  async getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentDto[]> {
+    const projectStatus = await this.masterDataRepo.getProjectStatusDevelopment(params);
+    return projectStatus.toDtos();
+  }
+
+
   async checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingDto | null> {
     return await this.masterDataRepo.checkProjectStatusBidding(id);
   }

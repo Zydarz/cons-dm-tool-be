@@ -331,15 +331,6 @@ export class ProjectsController {
     return await this.paymentTrackingService.deletePayment(id, user);
   }
 
-  // @Get(':projectId/salaries')
-  // @Auth(UserNS.ALL)
-  // @HttpCode(HttpStatus.OK)
-  // async getProjectSalaries(
-  //   @Param('projectId') projectId: string,
-  //   @Query() projectFilterOptionsDto: ProjectFilterOptionsDto,
-  // ): Promise<object> {
-  //   return await this.projectService.getProjectSalaries(projectId, projectFilterOptionsDto);
-  // }
 
   @Get(':projectId/salaries')
   @Auth(UserNS.ALL)
@@ -351,22 +342,4 @@ export class ProjectsController {
   ): Promise<object> {
     return await this.projectService.getProjectSalaries(projectId, resourceProjectFilterDto, user);
   }
-
-
-
-  //   @Get('timesheets')
-  //   @Auth(UserNS.ALL)
-  //   async getProjectAndMemberForTimesheets(
-  //     @AuthUser() user: UserEntity,
-  //   ): Promise<number> {
-
-  //     console.log('====== DEBUG: HÀM TIMESHEETS ĐANG CHẠY! ======');
-
-  // //    console.log('1111111');
-  //   //  console.log('user',user);
-  //     return 1;
-
-  //   }
-
-
 }

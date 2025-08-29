@@ -21,7 +21,7 @@ import { FilterDepartmentDto } from './dtos/requests/filter-department.dto';
 @Controller('master-data')
 export class MasterDataController {
   constructor(@Inject('IMasterDataService') private readonly masterDataService: MasterDataNS.IMasterDataService,
-  @Inject('IUserService') private readonly userService: UserNS.IUserService,) {}
+    @Inject('IUserService') private readonly userService: UserNS.IUserService,) { }
 
   @Auth(UserNS.ALL)
   @Get('list-master-data/:type')
@@ -93,5 +93,18 @@ export class MasterDataController {
   @Post('/other-cost')
   async createSettingOtherCost(@Body() params: CreateSettingOtherCostDto): Promise<SuccessResponseDto> {
     return await this.masterDataService.createSettingOtherCost(params);
+  }
+
+
+  @Auth(UserNS.ALL)
+  @Get('status-bidding')
+  async getProjectStatusBidding(@Query() params: FilterDepartmentDto): Promise<MasterDataDto[]> {
+    return await this.masterDataService.getProjectStatusBidding(params);
+  }
+
+  @Auth(UserNS.ALL)
+  @Get('status-development')
+  async getProjectStatusDevelopment(@Query() params: FilterDepartmentDto): Promise<MasterDataDto[]> {
+    return await this.masterDataService.getProjectStatusDevelopment(params);
   }
 }

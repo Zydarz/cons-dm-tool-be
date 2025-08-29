@@ -44,6 +44,8 @@ export namespace MasterDataNS {
     getMasterDataDepartment(id: number): Promise<DepartmentDto>;
     getMasterDataLine(id: number): Promise<LineDto>;
     checkProjectRank(id: number): Promise<ProjectRankDto | null>;
+    getProjectStatusBidding(params: FilterDepartmentDto): Promise<ProjectStatusBiddingDto[]>;
+    getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentDto[]>;
     checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingDto | null>;
     checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentDto | null>;
     checkOtherCost(id: number): Promise<SettingOtherCostDto | null>;
@@ -67,6 +69,8 @@ export namespace MasterDataNS {
     getMasterDataJobRank(id: number): Promise<JobRankEntity>;
     getMasterDataLine(id: number): Promise<DepartmentEntity>;
     checkProjectRank(id: number): Promise<ProjectRankEntity | null>;
+    getProjectStatusBidding(params: FilterDepartmentDto): Promise<ProjectStatusBiddingEntity[]>;
+    getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentEntity[]>;
     checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingEntity | null>;
     checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentEntity | null>;
     checkSettingOtherCose(id: number): Promise<SettingOtherCostEntity | null>;

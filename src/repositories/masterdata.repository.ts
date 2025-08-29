@@ -502,6 +502,9 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
     return line;
   }
 
+
+
+
   async getDepartment(params: FilterDepartmentDto): Promise<DepartmentEntity[]> {
     const department = await this.departmentEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
     return department;
@@ -590,6 +593,17 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
     await this.settingOtherCostEntity.create({ ...params, flag_protected: 0, order: maxOrder });
     return new SuccessResponseDto(true);
   }
+
+  async getProjectStatusBidding(params: FilterDepartmentDto): Promise<ProjectStatusBiddingEntity[]> {
+    const projectStatus = await this.projectStatusBiddingEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
+    return projectStatus;
+  }
+
+  async getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentEntity[]> {
+    const projectStatus = await this.projectStatusDevelopmentEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
+    return projectStatus;
+  }
+
 
   // Thêm 2 methods bị thiếu để implement interface
   async checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingEntity | null> {
