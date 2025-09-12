@@ -67,10 +67,6 @@ export class ProjectDto extends AbstractDto {
   budget?: number;
 
   @ApiPropertyOptional()
-  @IsOptional()
-  billable?: number;
-
-  @ApiPropertyOptional()
   currency: ProjectNS.Currency;
 
   @ApiPropertyOptional()
@@ -94,7 +90,7 @@ export class ProjectDto extends AbstractDto {
   @ApiPropertyOptional()
   channelId?: string;
 
-  // Các trường mới được thêm
+  // Các trường mới được thêm trước đó
   @ApiPropertyOptional()
   @IsOptional()
   backLogId?: string;
@@ -114,6 +110,19 @@ export class ProjectDto extends AbstractDto {
   @ApiPropertyOptional()
   @IsOptional()
   statusDevelopment?: number;
+
+  // 3 trường dữ liệu mới được bổ xung
+  @ApiPropertyOptional()
+  @IsOptional()
+  application?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  budgetCustomer?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  feedbackDate?: Date;
 
   // Existing relationships
   @ApiPropertyOptional({ type: () => ContractTypeDto })
@@ -156,19 +165,23 @@ export class ProjectDto extends AbstractDto {
     this.externalPrice = project.externalPrice;
     this.userProjects = project.userProjects?.toDtos();
     this.budget = project.budget;
-    this.billable = project.billable;
     this.currency = project.currency;
     this.actual = resourceSummary?.actual;
     this.user = UserNS.dtos.toUserDtos(user);
     this.channelId = project.botSetting?.channelId;
     this.groupId = project.botSetting?.groupId;
 
-    // Gán giá trị cho các trường mới
+    // Gán giá trị cho các trường mới được thêm trước đó
     this.backLogId = project.backLogId;
     this.techStack = project.techStack;
     this.market = project.market;
     this.statusBidding = project.statusBidding;
     this.statusDevelopment = project.statusDevelopment;
+
+    // Gán giá trị cho 3 trường dữ liệu mới được bổ xung
+    this.application = project.application;
+    this.budgetCustomer = project.budgetCustomer;
+    this.feedbackDate = project.feedbackDate;
 
     // Gán giá trị cho relationships mới
     this.projectStatusBidding = project.projectStatusBidding?.toDto();

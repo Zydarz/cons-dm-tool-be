@@ -5,7 +5,7 @@ import { ProjectNS } from '../../interfaces/project';
 export class CreateProjectDto {
   @ApiProperty()
   @IsString()
-  @Length(1, 30)
+  @Length(1, 250)
   name: string;
 
   @ApiProperty()
@@ -100,7 +100,6 @@ export class CreateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  @Length(0, 255)
   backLogId?: string;
 
   @ApiPropertyOptional()
@@ -116,12 +115,28 @@ export class CreateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(1)
   statusBidding?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(1)
   statusDevelopment?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Length(0, 255)
+  application?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(999999.99)
+  budgetCustomer?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  feedbackDate?: Date;
 }

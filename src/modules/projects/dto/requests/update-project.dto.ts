@@ -6,7 +6,7 @@ export class UpdateProjectDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  @Length(1, 30)
+  @Length(1, 250)
   name?: string;
 
   @ApiPropertyOptional()
@@ -123,12 +123,28 @@ export class UpdateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(1)
   statusBidding?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(1)
   statusDevelopment?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Length(0, 255)
+  application?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  @Min(0)
+  @Max(999999.99)
+  budgetCustomer?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsDateString()
+  feedbackDate?: Date;
 }

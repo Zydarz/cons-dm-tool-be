@@ -71,7 +71,7 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: DataType.DOUBLE })
   externalPrice?: number;
 
-  // Các trường mới được thêm
+  // Các trường mới được thêm trước đó
   @Column({ type: DataType.STRING, allowNull: true })
   backLogId?: string;
 
@@ -86,6 +86,16 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
 
   @Column({ type: DataType.INTEGER, allowNull: true })
   statusDevelopment?: number;
+
+  // 3 trường dữ liệu mới được bổ xung
+  @Column({ type: DataType.STRING(255), allowNull: true })
+  application?: string;
+
+  @Column({ type: DataType.DOUBLE(8, 2), allowNull: true })
+  budgetCustomer?: number;
+
+  @Column({ type: DataType.DATE, allowNull: true })
+  feedbackDate?: Date;
 
   @DeletedAt
   deletedAt: Date;
