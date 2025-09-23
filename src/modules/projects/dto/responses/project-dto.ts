@@ -153,7 +153,7 @@ export class ProjectDto extends AbstractDto {
     this.pm = project.pm;
     this.am = project.am;
     this.customer = project.customer?.toDto();
-    this.type = project.contractType?.name;
+    this.type = project.type;
     this.contractType = project.contractType?.toDto();
     this.department = project.department?.toDto();
     this.startDate = project.startDate;

@@ -30,7 +30,7 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   code: string;
 
   @Column({ type: DataType.STRING})
-  type: ProjectNS.Type;
+  type: string;
 
   @Column({ type: DataType.TEXT })
   am?: string;

@@ -14,7 +14,7 @@ export class ProjectPositionResourceAllocateDto extends AbstractDto {
   code: string;
 
   @ApiPropertyOptional()
-  type?: ProjectNS.Type;
+  type?: string;
 
   @ApiPropertyOptional()
   status?: ProjectNS.Status;

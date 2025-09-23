@@ -24,7 +24,7 @@ export class CreateProjectDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  type?: ProjectNS.Type;
+  type?: string;
 
   @ApiPropertyOptional()
   @IsDateString()

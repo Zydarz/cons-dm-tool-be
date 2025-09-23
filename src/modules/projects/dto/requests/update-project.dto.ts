@@ -38,7 +38,7 @@ export class UpdateProjectDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  type?: ProjectNS.Type;
+  type?: string;
 
   @ApiPropertyOptional()
   @IsDateString()
