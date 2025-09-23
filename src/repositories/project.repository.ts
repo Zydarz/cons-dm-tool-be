@@ -99,11 +99,30 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
         });
       }
 
-      if (!isNil(projectFilterOptionsDto.status)) {
-        const array = projectFilterOptionsDto.status.split(',');
+
+      if (
+        !isNil(projectFilterOptionsDto.projectType) &&
+        ['Bidding', 'Development'].includes(projectFilterOptionsDto.projectType)
+      ) {
         Object.assign(condition, {
-          status: { [Op.in]: array },
+          type: projectFilterOptionsDto.projectType,
         });
+
+        if (!isNil(projectFilterOptionsDto.status)) {
+          const array = projectFilterOptionsDto.status.split(',');
+          if(projectFilterOptionsDto.projectType === 'Bidding'){
+            Object.assign(condition, {
+             statusBidding: { [Op.in]: array },
+            });
+          }
+          if(projectFilterOptionsDto.projectType === 'Development'){
+            Object.assign(condition, {
+              statusDevelopment: { [Op.in]: array },
+             });
+          }
+        }
+
+
       }
     }
 
@@ -129,6 +148,7 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
       distinct: true,
       order: [['startDate', 'DESC']],
     });
+
 
     const pageMetaDto = new PageMetaDto({ pageOptionsDto: projectFilterOptionsDto, itemCount: results.count });
     const items = results.rows;

@@ -29,9 +29,13 @@ export class ProjectFilterOptionsDto extends PageOptionsDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  status?: ProjectNS.Status;
+  status?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
   email?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  projectType?: string;
 }
