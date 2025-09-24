@@ -8,6 +8,7 @@ import {
   LineDto,
   ProjectStatusBiddingDto,
   ProjectStatusDevelopmentDto,
+  TaskStatusDto,
   ProjectRankDto,
   SettingOtherCostDto,
 } from './dtos/master-data.dto';
@@ -26,6 +27,7 @@ import { CreateSettingOtherCostDto } from './dtos/requests/create-setting-other-
 import { FilterDepartmentDto } from './dtos/requests/filter-department.dto';
 import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
 import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
+import TaskStatusEntity from 'entities/task-status.entity';
 
 export namespace MasterDataNS {
   export interface IMasterDataService {
@@ -48,6 +50,10 @@ export namespace MasterDataNS {
     getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentDto[]>;
     checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingDto | null>;
     checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentDto | null>;
+
+    getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusDto[]>;
+    checkTaskStatus(id: number): Promise<TaskStatusDto | null>;
+
     checkOtherCost(id: number): Promise<SettingOtherCostDto | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
     createSettingOtherCost(param: CreateSettingOtherCostDto): Promise<SuccessResponseDto>;
@@ -73,6 +79,10 @@ export namespace MasterDataNS {
     getProjectStatusDevelopment(params: FilterDepartmentDto): Promise<ProjectStatusDevelopmentEntity[]>;
     checkProjectStatusBidding(id: number): Promise<ProjectStatusBiddingEntity | null>;
     checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentEntity | null>;
+
+    getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusEntity[]>;
+    checkTaskStatus(id: number): Promise<TaskStatusEntity | null>;
+
     checkSettingOtherCose(id: number): Promise<SettingOtherCostEntity | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
     createSettingOtherCost(param: CreateSettingOtherCostDto): Promise<SuccessResponseDto>;
@@ -87,6 +97,7 @@ export namespace MasterDataNS {
     project_rank = 'Project Rank',
     project_status_bidding = 'Project Status Bidding',
     project_status_development = 'Project Status Development',
+    task_status = 'Task Status',
     setting_other_cost = 'Cost Setting',
   }
 
@@ -99,6 +110,7 @@ export namespace MasterDataNS {
     project_rank = 'project_rank',
     project_status_bidding = 'project_status_bidding',
     project_status_development = 'project_status_development',
+    task_status = 'task_status',
     setting_other_cost = 'setting_other_cost',
   }
   export const ERRORS = {

@@ -31,6 +31,7 @@ import { CreateSettingOtherCostDto } from '../modules/master-data/dtos/requests/
 import { FilterDepartmentDto } from '../modules/master-data/dtos/requests/filter-department.dto';
 import { default as ProjectStatusBiddingEntity } from '../entities/project-status-bidding.entity';
 import { default as ProjectStatusDevelopmentEntity } from '../entities/project-status-development.entity';
+import { default as TaskStatusEntity } from '../entities/task-status.entity';
 
 export class MasterDataRepository implements MasterDataNS.IMasterDataRepository {
   constructor(
@@ -38,6 +39,7 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
     @Inject(ProjectRankEntity.name) private readonly projectRankEntity: typeof ProjectRankEntity,
     @Inject(ProjectStatusBiddingEntity.name) private readonly projectStatusBiddingEntity: typeof ProjectStatusBiddingEntity,
     @Inject(ProjectStatusDevelopmentEntity.name) private readonly projectStatusDevelopmentEntity: typeof ProjectStatusDevelopmentEntity,
+    @Inject(TaskStatusEntity.name) private readonly taskStatusEntity: typeof TaskStatusEntity,
     @Inject(JobRankEntity.name) private readonly jobRankEntity: typeof JobRankEntity,
     @Inject(DailyReportActivitiesEntity.name)
     private readonly dailyReportActivitiesEntity: typeof DailyReportActivitiesEntity,
@@ -108,6 +110,18 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
           })
         ).toDtos();
         count = await this.projectStatusDevelopmentEntity.count();
+        break;
+
+
+      case MasterDataNS.MasterDataCodeList.task_status:
+        rows = (
+          await this.taskStatusEntity.findAll({
+            order: [['order', dto.order]],
+            limit: dto.take,
+            offset: dto.skip,
+          })
+        ).toDtos();
+        count = await this.taskStatusEntity.count();
         break;
 
       case MasterDataNS.MasterDataCodeList.job_rank:
@@ -213,6 +227,9 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
         case MasterDataNS.MasterDataCodeList.project_status_development:
           return this.projectStatusDevelopmentEntity.update({ ...data }, { where: { id: data.id } });
 
+        case MasterDataNS.MasterDataCodeList.task_status:
+          return this.taskStatusEntity.update({ ...data }, { where: { id: data.id } });
+
         case MasterDataNS.MasterDataCodeList.line:
           if (dataDB[data.id]?.flag_protected == FLAG_PROTECTED) {
             data.name = dataDB[data.id]?.name;
@@ -258,6 +275,9 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
 
         case MasterDataNS.MasterDataCodeList.project_status_development:
           return this.projectStatusDevelopmentEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
+
+        case MasterDataNS.MasterDataCodeList.task_status:
+          return this.taskStatusEntity.update({ deletedAt: new Date() }, { where: { id: data.id }, returning: true });
 
         case MasterDataNS.MasterDataCodeList.line:
           if (dataDB[data.id]?.users == 0) {
@@ -410,6 +430,7 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       countProjectRankOp,
       countProjectStatusBiddingOp,
       countProjectStatusDevelopmentOp,
+      countTaskStatusOp,
       countsettingOtherCostOp,
     ] = await Promise.all([
       this.positionEntity.count(),
@@ -420,6 +441,7 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       this.projectRankEntity.count(),
       this.projectStatusBiddingEntity.count(),
       this.projectStatusDevelopmentEntity.count(),
+      this.taskStatusEntity.count(),
       this.settingOtherCostEntity.count(),
     ]);
     const projectRoleOp: MasterDataOptionDto = {
@@ -462,12 +484,17 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
       countOptions: countProjectStatusDevelopmentOp,
       code: MasterDataNS.MasterDataCodeList.project_status_development,
     };
+    const taskStatusOp: MasterDataOptionDto = {
+      dataType: MasterDataNS.MasterDataList.task_status,
+      countOptions: countTaskStatusOp,
+      code: MasterDataNS.MasterDataCodeList.task_status,
+    };
     const settingOtherCostOp: MasterDataOptionDto = {
       dataType: MasterDataNS.MasterDataList.setting_other_cost,
       countOptions: countsettingOtherCostOp,
       code: MasterDataNS.MasterDataCodeList.setting_other_cost,
     };
-    return [projectRoleOp, lineOp, contractTypeOp, dailyReportActivitiesOp, jobRankOp, projectRankOp, projectStatusBiddingOp, projectStatusDevelopmentOp, settingOtherCostOp];
+    return [projectRoleOp, lineOp, contractTypeOp, dailyReportActivitiesOp, jobRankOp, projectRankOp, projectStatusBiddingOp, projectStatusDevelopmentOp,taskStatusOp, settingOtherCostOp];
   }
 
   async getMasterDateContractType(id: number): Promise<ContractTypeEntity> {
@@ -603,6 +630,11 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
     const projectStatus = await this.projectStatusDevelopmentEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
     return projectStatus;
   }
+  async getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusEntity[]> {
+    const taskStatus = await this.taskStatusEntity.findAll({ order: [[params.orderField ?? 'createdAt', params.orderType ?? 'DESC']] });
+    return taskStatus;
+  }
+
 
 
   // Thêm 2 methods bị thiếu để implement interface
@@ -612,5 +644,9 @@ export class MasterDataRepository implements MasterDataNS.IMasterDataRepository 
 
   async checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentEntity | null> {
     return await this.projectStatusDevelopmentEntity.findByPk(id);
+  }
+
+  async checkTaskStatus(id: number): Promise<TaskStatusEntity | null> {
+    return await this.taskStatusEntity.findByPk(id);
   }
 }

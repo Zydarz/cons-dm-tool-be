@@ -16,6 +16,8 @@ import projectEntity from '../../entities/project.entity';
 import { default as SettingOtherCostEntity } from '../../entities/setting-other-cost.entity';
 import { default as ProjectStatusBiddingEntity } from '../../entities/project-status-bidding.entity';
 import { default as ProjectStatusDevelopmentEntity } from '../../entities/project-status-development.entity';
+import { default as TaskStatusEntity } from '../../entities/task-status.entity';
+
 
 
 const providers = [
@@ -43,6 +45,11 @@ const providers = [
     provide: ProjectStatusDevelopmentEntity.name,
     useValue: ProjectStatusDevelopmentEntity,
   },
+  {
+    provide: TaskStatusEntity.name,
+    useValue: TaskStatusEntity,
+  },
+  
   {
     provide: JobRankEntity.name,
     useValue: JobRankEntity,

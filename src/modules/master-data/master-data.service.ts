@@ -11,6 +11,7 @@ import {
   MasterDataDto,
   ProjectStatusBiddingDto,
   ProjectStatusDevelopmentDto,
+  TaskStatusDto,
   ProjectRankDto,
   SettingOtherCostDto,
 } from './dtos/master-data.dto';
@@ -117,6 +118,17 @@ export class MasterDataService implements MasterDataNS.IMasterDataService {
   async checkProjectStatusDevelopment(id: number): Promise<ProjectStatusDevelopmentDto | null> {
     return await this.masterDataRepo.checkProjectStatusDevelopment(id);
   }
+
+  async getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusDto[]> {
+    const projectStatus = await this.masterDataRepo.getTaskStatus(params);
+    return projectStatus.toDtos();
+  }
+
+   async checkTaskStatus(id: number): Promise<TaskStatusDto | null> {
+    return await this.masterDataRepo.checkTaskStatus(id);
+  }
+
+
   async checkOtherCost(id: number): Promise<SettingOtherCostDto | null> {
     return await this.masterDataRepo.checkSettingOtherCose(id);
   }

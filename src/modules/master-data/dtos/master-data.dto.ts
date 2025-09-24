@@ -11,6 +11,7 @@ import { default as DepartmentEntity } from '../../../entities/department.entity
 import { default as SettingOtherCostEntity } from '../../../entities/setting-other-cost.entity';
 import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
 import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
+import TaskStatusEntity from 'entities/task-status.entity';
 
 export class MasterDataDto extends AbstractDto {
   @ApiProperty()
@@ -98,6 +99,15 @@ export class ProjectStatusBiddingDto extends MasterDataDto {
 
 export class ProjectStatusDevelopmentDto extends MasterDataDto {
   constructor(entity: ProjectStatusDevelopmentEntity) {
+    super(entity);
+    this.name = entity.name;
+    this.order = entity.order;
+  }
+}
+
+
+export class TaskStatusDto extends MasterDataDto {
+  constructor(entity: TaskStatusEntity) {
     super(entity);
     this.name = entity.name;
     this.order = entity.order;
