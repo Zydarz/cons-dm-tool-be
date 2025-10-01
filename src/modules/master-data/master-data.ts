@@ -10,6 +10,8 @@ import {
   ProjectStatusDevelopmentDto,
   TaskStatusDto,
   ProjectRankDto,
+  ProjectPriorityDto,
+  ProjectDomainDto,
   SettingOtherCostDto,
 } from './dtos/master-data.dto';
 import { PageDto } from '../../common/dto/page.dto';
@@ -28,6 +30,8 @@ import { FilterDepartmentDto } from './dtos/requests/filter-department.dto';
 import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
 import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
 import TaskStatusEntity from 'entities/task-status.entity';
+import ProjectDomainEntity from 'entities/project-domain.entity';
+import ProjectPriorityEntity from 'entities/project-priority.entity';
 
 export namespace MasterDataNS {
   export interface IMasterDataService {
@@ -53,6 +57,11 @@ export namespace MasterDataNS {
 
     getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusDto[]>;
     checkTaskStatus(id: number): Promise<TaskStatusDto | null>;
+
+    getProjectDomain(params: FilterDepartmentDto): Promise<ProjectDomainDto[]>;
+    checkProjectDomain(id: number): Promise<ProjectDomainDto | null>;
+    getProjectPriority(params: FilterDepartmentDto): Promise<ProjectPriorityDto[]>;
+    checkProjectPriority(id: number): Promise<ProjectPriorityDto | null>;
 
     checkOtherCost(id: number): Promise<SettingOtherCostDto | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
@@ -83,6 +92,11 @@ export namespace MasterDataNS {
     getTaskStatus(params: FilterDepartmentDto): Promise<TaskStatusEntity[]>;
     checkTaskStatus(id: number): Promise<TaskStatusEntity | null>;
 
+    getProjectDomain(params: FilterDepartmentDto): Promise<ProjectDomainEntity[]>;
+    checkProjectDomain(id: number): Promise<ProjectDomainEntity | null>;
+    getProjectPriority(params: FilterDepartmentDto): Promise<ProjectPriorityEntity[]>;
+    checkProjectPriority(id: number): Promise<ProjectPriorityEntity | null>;
+
     checkSettingOtherCose(id: number): Promise<SettingOtherCostEntity | null>;
     getSettingOtherCost(): Promise<SettingOtherCostDto[]>;
     createSettingOtherCost(param: CreateSettingOtherCostDto): Promise<SuccessResponseDto>;
@@ -99,6 +113,8 @@ export namespace MasterDataNS {
     project_status_development = 'Project Status Development',
     task_status = 'Task Status',
     setting_other_cost = 'Cost Setting',
+    project_domain = 'Project Domain',
+    project_priority = 'Project Priority',
   }
 
   export enum MasterDataCodeList {
@@ -112,6 +128,8 @@ export namespace MasterDataNS {
     project_status_development = 'project_status_development',
     task_status = 'task_status',
     setting_other_cost = 'setting_other_cost',
+    project_domain = 'project_domain',
+    project_priority = 'project_priority',
   }
   export const ERRORS = {
     MasterNotFound: new NotFoundException('master.not.exist'),

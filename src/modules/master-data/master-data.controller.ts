@@ -108,10 +108,22 @@ export class MasterDataController {
     return await this.masterDataService.getProjectStatusDevelopment(params);
   }
 
-  
+
   @Auth(UserNS.ALL)
   @Get('task-status')
   async getTaskStatus(@Query() params: FilterDepartmentDto): Promise<MasterDataDto[]> {
     return await this.masterDataService.getTaskStatus(params);
+  }
+
+  @Auth(UserNS.ALL)
+  @Get('project-domain')
+  async getProjectDomain(@Query() params: FilterDepartmentDto): Promise<MasterDataDto[]> {
+    return await this.masterDataService.getProjectDomain(params);
+  }
+
+  @Auth(UserNS.ALL)
+  @Get('project-priority')
+  async getProjectPriority(@Query() params: FilterDepartmentDto): Promise<MasterDataDto[]> {
+    return await this.masterDataService.getProjectPriority(params);
   }
 }

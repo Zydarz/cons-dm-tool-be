@@ -112,6 +112,8 @@ export class ProjectsService implements ProjectNS.IProjectService {
 
   async getAll(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<PageDto<ProjectDto>> {
     const results = await this.projectRepository.getAll(projectFilterOptionsDto);
+
+    
     const projectDtos = results.data;
     await Promise.all(
       projectDtos.map(async (p) => {

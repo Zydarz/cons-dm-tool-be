@@ -12,6 +12,8 @@ import { default as CustomerEntity } from './customer.entity';
 import { default as DepartmentEntity } from './department.entity';
 import { default as ProjectStatusBiddingEntity } from './project-status-bidding.entity';
 import { default as ProjectStatusDevelopmentEntity } from './project-status-development.entity';
+import { default as ProjectDomainEntity } from './project-domain.entity';
+import { default as ProjectPriorityEntity } from './project-priority.entity';
 
 const TYPE = ProjectNS.Type;
 const CURRENCY = ProjectNS.Currency;
@@ -29,7 +31,7 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: DataType.STRING })
   code: string;
 
-  @Column({ type: DataType.STRING})
+  @Column({ type: DataType.STRING })
   type: string;
 
   @Column({ type: DataType.TEXT })
@@ -97,6 +99,22 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
   @Column({ type: DataType.DATE, allowNull: true })
   feedbackDate?: Date;
 
+  // 5 trường mới cần bổ sung
+  @Column({ type: DataType.STRING(3000), allowNull: true })
+  wbsLink?: string;
+
+  @Column({ type: DataType.STRING(100), allowNull: true })
+  departmentIds?: string;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  winRate?: number;
+
+  @Column({ type: DataType.STRING(100), allowNull: true })
+  domains?: string;
+
+  @Column({ type: DataType.INTEGER, allowNull: true })
+  priority?: number;
+
   @DeletedAt
   deletedAt: Date;
 
@@ -131,4 +149,7 @@ export default class ProjectEntity extends AbstractEntity<ProjectDto> {
 
   @BelongsTo(() => ProjectStatusDevelopmentEntity, 'statusDevelopment')
   projectStatusDevelopment?: ProjectStatusDevelopmentEntity;
+
+  @BelongsTo(() => ProjectPriorityEntity, 'priority')
+  projectPriority?: ProjectPriorityEntity;
 }

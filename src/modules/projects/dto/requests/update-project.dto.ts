@@ -147,4 +147,37 @@ export class UpdateProjectDto {
   @IsOptional()
   @IsDateString()
   feedbackDate?: Date;
+
+  // 5 trường mới cần bổ sung
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Length(0, 3000)
+  wbsLink?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Length(0, 100)
+  departmentIds?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  winRate?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  @Length(0, 100)
+  domains?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  @Max(999)
+  priority?: number;
 }

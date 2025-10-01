@@ -12,6 +12,8 @@ import { default as SettingOtherCostEntity } from '../../../entities/setting-oth
 import ProjectStatusBiddingEntity from 'entities/project-status-bidding.entity';
 import ProjectStatusDevelopmentEntity from 'entities/project-status-development.entity';
 import TaskStatusEntity from 'entities/task-status.entity';
+import ProjectDomainEntity from 'entities/project-domain.entity';
+import ProjectPriorityEntity from 'entities/project-priority.entity';
 
 export class MasterDataDto extends AbstractDto {
   @ApiProperty()
@@ -113,6 +115,23 @@ export class TaskStatusDto extends MasterDataDto {
     this.order = entity.order;
   }
 }
+
+export class ProjectPriorityDto extends MasterDataDto {
+  constructor(entity: ProjectPriorityEntity) {
+    super(entity);
+    this.name = entity.name;
+    this.order = entity.order;
+  }
+}
+
+export class ProjectDomainDto extends MasterDataDto {
+  constructor(entity: ProjectDomainEntity) {
+    super(entity);
+    this.name = entity.name;
+    this.order = entity.order;
+  }
+}
+
 
 
 export class PositionDto extends MasterDataDto {

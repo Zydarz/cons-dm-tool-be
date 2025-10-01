@@ -124,6 +124,27 @@ export class ProjectDto extends AbstractDto {
   @IsOptional()
   feedbackDate?: Date;
 
+  // 5 trường mới cần bổ sung
+  @ApiPropertyOptional()
+  @IsOptional()
+  wbsLink?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  departmentIds?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  winRate?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  domains?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  priority?: number;
+
   // Existing relationships
   @ApiPropertyOptional({ type: () => ContractTypeDto })
   contractType?: ContractTypeDto;
@@ -143,6 +164,9 @@ export class ProjectDto extends AbstractDto {
 
   @ApiPropertyOptional({ type: () => MasterDataDto })
   projectStatusDevelopment?: MasterDataDto;
+
+  @ApiPropertyOptional({ type: () => MasterDataDto })
+  projectPriority?: MasterDataDto;
 
   constructor(project: ProjectEntity, resourceSummary?: ResourceSummaryDto, user?: UserEntity[]) {
     super(project);
@@ -183,8 +207,16 @@ export class ProjectDto extends AbstractDto {
     this.budgetCustomer = project.budgetCustomer;
     this.feedbackDate = project.feedbackDate;
 
+    // Gán giá trị cho 5 trường mới cần bổ sung
+    this.wbsLink = project.wbsLink;
+    this.departmentIds = project.departmentIds;
+    this.winRate = project.winRate;
+    this.domains = project.domains;
+    this.priority = project.priority;
+
     // Gán giá trị cho relationships mới
     this.projectStatusBidding = project.projectStatusBidding?.toDto();
     this.projectStatusDevelopment = project.projectStatusDevelopment?.toDto();
+    this.projectPriority = project.projectPriority?.toDto();
   }
 }

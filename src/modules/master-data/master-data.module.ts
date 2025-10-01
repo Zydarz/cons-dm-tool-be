@@ -17,6 +17,8 @@ import { default as SettingOtherCostEntity } from '../../entities/setting-other-
 import { default as ProjectStatusBiddingEntity } from '../../entities/project-status-bidding.entity';
 import { default as ProjectStatusDevelopmentEntity } from '../../entities/project-status-development.entity';
 import { default as TaskStatusEntity } from '../../entities/task-status.entity';
+import { default as ProjectDomainEntity } from '../../entities/project-domain.entity';
+import { default as ProjectPriorityEntity } from '../../entities/project-priority.entity';
 
 
 
@@ -37,7 +39,7 @@ const providers = [
     provide: ProjectRankEntity.name,
     useValue: ProjectRankEntity,
   },
-    {
+  {
     provide: ProjectStatusBiddingEntity.name,
     useValue: ProjectStatusBiddingEntity,
   },
@@ -49,7 +51,14 @@ const providers = [
     provide: TaskStatusEntity.name,
     useValue: TaskStatusEntity,
   },
-  
+  {
+    provide: ProjectDomainEntity.name,
+    useValue: ProjectDomainEntity,
+  },
+  {
+    provide: ProjectPriorityEntity.name,
+    useValue: ProjectPriorityEntity,
+  },
   {
     provide: JobRankEntity.name,
     useValue: JobRankEntity,
@@ -90,4 +99,4 @@ const providers = [
   controllers: [MasterDataController],
   exports: [...providers],
 })
-export class MasterDataModule {}
+export class MasterDataModule { }

@@ -151,6 +151,7 @@ export class ProjectsController {
   @HttpCode(HttpStatus.CREATED)
   @Auth([UserNS.Roles.ADMIN])
   async createProject(@Body() createProjectDto: CreateProjectDto): Promise<ProjectDto> {
+    console.log('createProjectDto', createProjectDto);
     return await this.projectService.createProject(createProjectDto);
   }
 
