@@ -38,7 +38,7 @@ export class ProjectSituationService implements IProjectSituationService {
 
     @Inject('IProjectSituationHistoryService')
     private readonly projectSituationHistoryService: IProjectSituationHistoryService,
-  ) {}
+  ) { }
 
   async getAll(dto: GetAllProjectSituationDto): Promise<PageDto<ProjectSituationDto>> {
     try {
@@ -69,7 +69,7 @@ export class ProjectSituationService implements IProjectSituationService {
         const index = !isNil(count[0].getDataValue('count')) ? parseFloat(count[0].getDataValue('count')) + 1 : 0;
         for (const dt of dto.createDto) {
           const project = await this.projectService.getProjectbyId(dt.projectId);
-          if(isNil(project)) {
+          if (isNil(project)) {
             errMsg = 'The project invalid';
             throw new ProjectSituationInvalidErr(errMsg);
           }
@@ -147,7 +147,7 @@ export class ProjectSituationService implements IProjectSituationService {
             }
 
             const project = await this.projectService.getProjectbyId(projectSituation.projectId);
-            if(isNil(project)) {
+            if (isNil(project)) {
               errMsg = 'The project invalid';
               throw new ProjectSituationInvalidErr(errMsg);
             }
@@ -164,7 +164,7 @@ export class ProjectSituationService implements IProjectSituationService {
             }
             await projectSituation.save();
             const projectSituationCopy = JSON.parse(JSON.stringify(projectSituation));
-            await this.projectSituationHistoryService.createProjectSituationHistory({ ... projectSituationCopy, submitterId: userId});
+            await this.projectSituationHistoryService.createProjectSituationHistory({ ...projectSituationCopy, submitterId: userId });
             const projectSituationHistories = await this.projectSituationHistoryService.getProjectSituationHistoryByProjectSituationId(projectSituation.id);
             situation.push(new ProjectSituationResponseDto(projectSituation, user, project, projectSituationHistories));
           }
@@ -247,6 +247,7 @@ export class ProjectSituationService implements IProjectSituationService {
           if (filter.groupBy === GroupBy.PROJECT) {
             const situation = await this.projectSituationRepository.getSituationByProjectId(arr, filter);
             const project = await this.projectService.getProjectbyId(arr);
+
             return new ProjectSituationAllDto(situation.length, situation, undefined, undefined, project);
           }
 
@@ -279,7 +280,7 @@ export class ProjectSituationService implements IProjectSituationService {
     let listDate: any[] = [];
     let projectSituationByDate: any[] = [];
     projectSituation?.forEach((situation: any) => {
-      if(!projectSituationByDate.hasOwnProperty(situation.date)) {
+      if (!projectSituationByDate.hasOwnProperty(situation.date)) {
         projectSituationByDate[situation.date] = [{
           id: situation.id,
           num: 1,
@@ -295,9 +296,9 @@ export class ProjectSituationService implements IProjectSituationService {
     })
     projectSituation?.forEach((situation: any, index) => {
       let name = moment(situation.date).format('YYYY/MM/DD');
-      if(projectSituationByDate[situation.date].length > 1) {
+      if (projectSituationByDate[situation.date].length > 1) {
         projectSituationByDate[situation.date].forEach((sD: any) => {
-          if(situation.id == sD.id) {
+          if (situation.id == sD.id) {
             name = name + ' (' + sD.num + ')';
           }
         })

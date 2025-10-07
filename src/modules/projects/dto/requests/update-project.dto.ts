@@ -164,8 +164,6 @@ export class UpdateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(0)
-  @Max(100)
   winRate?: number;
 
   @ApiPropertyOptional()
@@ -177,7 +175,5 @@ export class UpdateProjectDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
-  @Min(1)
-  @Max(999)
   priority?: number;
 }
