@@ -22,7 +22,7 @@ import { PageMetaDto } from '../common/dto/page-meta.dto';
 export class ProjectSituationRepository implements IProjectSituationRepository {
   constructor(
     @Inject(ProjectSituationEntity.name) private readonly projectSituationEntity: typeof ProjectSituationEntity,
-  ) {}
+  ) { }
   async getAll(dto: GetAllProjectSituationDto): Promise<PageDto<ProjectSituationDto>> {
     const condition = {
       projectId: dto.projectId,
@@ -35,7 +35,7 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
       as: 'submitter',
     };
     const projectSituation = await this.projectSituationEntity.findAndCountAll({
-      where : condition,
+      where: condition,
       include: [
         relation
       ],
@@ -142,7 +142,7 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
     }
 
     if (filter.status !== ProjectNS.Status.ALL) {
-      if(isNil(filter.projectIds)) {
+      if (isNil(filter.projectIds)) {
         conditionIncludeProject = {
           [Op.and]: {
             status: filter.status,
@@ -152,7 +152,7 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
         conditionIncludeProject = {
           [Op.and]: {
             status: filter.status,
-            id:  { [Op.in]: filter.projectIds },
+            id: { [Op.in]: filter.projectIds },
           },
         }
       }
@@ -166,12 +166,12 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
         },
       ];
     } else {
-      if(isNil(filter.projectIds)) {
+      if (isNil(filter.projectIds)) {
         conditionIncludeProject = {}
       } else {
         conditionIncludeProject = {
           [Op.and]: {
-            id:  { [Op.in]: filter.projectIds },
+            id: { [Op.in]: filter.projectIds },
           },
         }
       }
@@ -184,7 +184,6 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
         },
       ];
     }
-
     let group;
     if (filter.groupBy === GroupBy.PROJECT) {
       group = [ProjectSituationNS.Type.PROJECTID];
@@ -199,11 +198,12 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
         order: [[sequelize.literal('latestUpdate'), 'DESC']],
         raw: true,
       });
-      
-      
+
+
       const array = payment.map((p) => p.projectId);
       return array;
     }
+
     group = [ProjectSituationNS.Type.MONTH, ProjectSituationNS.Type.YEAR];
     const payment = await this.projectSituationEntity.findAll({
       where: condition,

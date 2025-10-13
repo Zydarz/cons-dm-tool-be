@@ -779,64 +779,65 @@ export class ResourceRepository implements ResourceNS.IResourceRepository {
     return userIds;
   }
 
-  async getListUserIdFilterOptions(
-    startDate: Date,
-    endDate: Date,
-    positionIds?: number[],
-    projectIds?: number[],
-    departmentIds?: number[],
-  ): Promise<string[]> {
-    const condition = {
-      date: { [Op.between]: [startDate, endDate] },
-    };
-    const childCondition = {};
-    const userCondition = {};
+async getListUserIdFilterOptions(
+  startDate: Date,
+  endDate: Date,
+  positionIds?: number[],
+  projectIds?: number[],
+  departmentIds?: number[],
+): Promise<string[]> {
+  const condition = {
+    date: { [Op.between]: [startDate, endDate] },
+  };
+  const childCondition = {};
+  const userCondition = {};
 
-    if (!isNil(positionIds) && positionIds.length > 0) {
-      Object.assign(condition, {
-        positionId: { [Op.in]: positionIds },
-      });
-    }
-
-    if (!isNil(projectIds) && projectIds.length > 0) {
-      Object.assign(childCondition, {
-        projectId: { [Op.in]: projectIds },
-      });
-    }
-
-    if (!isNil(departmentIds) && departmentIds.length > 0) {
-      Object.assign(userCondition, {
-        departmentId: { [Op.in]: departmentIds },
-      });
-    }
-
-    const listRecords = await this.resourceEntity.findAll({
-      where: condition,
-      group: ['userProjectId', 'positionId'],
-      include: {
-        model: UserProjectEntity,
-        attributes: ['userId', 'projectId'],
-        as: 'userProject',
-        required: true,
-        where: childCondition,
-        include: [
-          {
-            model: UserEntity,
-            as: 'users',
-            where: userCondition,
-          },
-        ],
-      },
-      nest: true,
-      raw: true,
+  if (!isNil(positionIds) && positionIds.length > 0) {
+    Object.assign(condition, {
+      positionId: { [Op.in]: positionIds },
     });
-
-    let userIds = listRecords.map((e) => e.userProject?.userId ?? '');
-    userIds = userIds.filter((e) => e !== '');
-    userIds = [...new Set(userIds)];
-
-    return userIds;
   }
+
+  if (!isNil(projectIds) && projectIds.length > 0) {
+    Object.assign(childCondition, {
+      projectId: { [Op.in]: projectIds },
+    });
+  }
+
+  if (!isNil(departmentIds) && departmentIds.length > 0) {
+    Object.assign(userCondition, {
+      departmentId: { [Op.in]: departmentIds },
+    });
+  }
+
+  const listRecords = await this.resourceEntity.findAll({
+    attributes: ['userProjectId'], // Chỉ cần cột này
+    where: condition,
+    // Bỏ group by
+    include: {
+      model: UserProjectEntity,
+      attributes: ['userId'],
+      as: 'userProject',
+      required: true,
+      where: childCondition,
+      include: [
+        {
+          model: UserEntity,
+          as: 'users',
+          where: userCondition,
+        },
+      ],
+    },
+    nest: true,
+    raw: true,
+  });
+
+  let userIds = listRecords.map((e) => e.userProject?.userId ?? '');
+  userIds = userIds.filter((e) => e !== '');
+  userIds = [...new Set(userIds)]; // Remove duplicates ở đây
+
+  return userIds;
+}
 
 async getResourcePms(userProjectIds: number[]): Promise<ResourceEntity[]> {
   const condition = {

@@ -82,7 +82,7 @@ export class ProjectSituationController {
     @Query(new ValidationPipe({ transform: true }))
     dto: FilterDto,
   ): Promise<ProjectSituationAllDto[] | PageDto<ProjectSituationFlag>> {
-    console.log('dto', dto);
+
     return await this.projectSituationService.getProjectSituationByGroup(dto);
   }
 

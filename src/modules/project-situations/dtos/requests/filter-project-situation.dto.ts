@@ -10,7 +10,7 @@ export class FilterDto extends PageOptionsDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  status?: string;
+  readonly status: string = ProjectNS.Status.ALL;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -22,10 +22,10 @@ export class FilterDto extends PageOptionsDto {
 
   @ApiPropertyOptional()
   @IsOptional()
-  readonly projectIds: String[];
-
+  readonly projectIds: String;
 
   @ApiPropertyOptional()
   @IsOptional()
-  projectType?: string;
+  readonly projectType?: string;
+
 }

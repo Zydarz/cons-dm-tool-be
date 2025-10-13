@@ -41,6 +41,8 @@ import { MasterDataNS } from '../../modules/master-data/master-data';
 import { Util } from '../../common/util';
 import { TimeSheetProjectDto } from './dto/responses/timesheet-project-dto';
 import { TimeSheetMemberDto } from '../../modules/users/dto/response/user-project-dto';
+import { FilterDepartmentDto } from 'modules/master-data/dtos/requests/filter-department.dto';
+import { CreateMasterDataDto } from 'modules/master-data/dtos/requests/create-master-data.dto';
 @Injectable()
 export class ProjectsService implements ProjectNS.IProjectService {
   constructor(
@@ -113,7 +115,7 @@ export class ProjectsService implements ProjectNS.IProjectService {
   async getAll(projectFilterOptionsDto: ProjectFilterOptionsDto): Promise<PageDto<ProjectDto>> {
     const results = await this.projectRepository.getAll(projectFilterOptionsDto);
 
-    
+
     const projectDtos = results.data;
     await Promise.all(
       projectDtos.map(async (p) => {
@@ -172,9 +174,42 @@ export class ProjectsService implements ProjectNS.IProjectService {
   async detailProject2(id: number, userId?: string | undefined, role?: UserNS.Roles | undefined): Promise<ProjectDto> {
     const project = await this.projectRepository.getProject({ projectId: id });
 
+//console.log('project', project);
+
     if (!project) {
       throw ProjectNS.errMsg.ProjectNotFound;
     }
+
+    const filterOptionsFull: FilterDepartmentDto = {
+      orderField: 'name', // Sắp xếp theo trường 'name'
+      orderType: 'ASC',   // Sắp xếp tăng dần (Ascending)
+    };
+
+
+    var departments = await this.masterDataService.getDepartment(filterOptionsFull);
+    project.projectDepartments = [];
+    if (project.departmentIds && project.departmentIds.length > 0) {
+      const requiredIds = project.departmentIds
+        .split(',')
+        .map(idStr => parseInt(idStr.trim(), 10));
+      const matchedDepartments = departments.filter(department =>
+        requiredIds.includes(department.id),
+      );
+      project.projectDepartments = matchedDepartments;
+    }
+
+    var domains = await this.masterDataService.getProjectDomain(filterOptionsFull);
+    project.projectDomains = [];
+    if (project.domains && project.domains.length > 0) {
+      const reqIds = project.domains
+        .split(',')
+        .map(idStr => parseInt(idStr.trim(), 10));
+      const matchDomain = domains.filter(dm =>
+        reqIds.includes(dm.id),
+      );
+      project.projectDomains = matchDomain;
+    }
+
     // TODO: role admin
     if (role === UserNS.Roles.ADMIN || role === UserNS.Roles.LOS) {
       return project;

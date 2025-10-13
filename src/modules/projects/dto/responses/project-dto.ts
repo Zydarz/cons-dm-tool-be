@@ -60,6 +60,10 @@ export class ProjectDto extends AbstractDto {
   externalPrice?: number;
 
   @ApiPropertyOptional()
+  @IsOptional()
+  billable?: number;
+
+  @ApiPropertyOptional()
   userProjects?: UserProjectDto[];
 
   @ApiPropertyOptional()
@@ -168,8 +172,15 @@ export class ProjectDto extends AbstractDto {
   @ApiPropertyOptional({ type: () => MasterDataDto })
   projectPriority?: MasterDataDto;
 
+  @ApiPropertyOptional({ type: () => [MasterDataDto] })
+  projectDomains?: MasterDataDto[];
+
+  @ApiPropertyOptional({ type: () => [DepartmentDto] })
+  projectDepartments?: DepartmentDto[];
+
   constructor(project: ProjectEntity, resourceSummary?: ResourceSummaryDto, user?: UserEntity[]) {
     super(project);
+
     this.customerId = project.customerId;
     this.departmentId = project.departmentId;
     this.name = project.name;
@@ -187,6 +198,7 @@ export class ProjectDto extends AbstractDto {
     this.status = project.status;
     this.internalPrice = project.internalPrice;
     this.externalPrice = project.externalPrice;
+    this.billable = project.billable;
     this.userProjects = project.userProjects?.toDtos();
     this.budget = project.budget;
     this.currency = project.currency;
@@ -210,13 +222,21 @@ export class ProjectDto extends AbstractDto {
     // Gán giá trị cho 5 trường mới cần bổ sung
     this.wbsLink = project.wbsLink;
     this.departmentIds = project.departmentIds;
-    this.winRate = project.winRate;
+    this.winRate = project.winRate != null ? Number(project.winRate) : undefined;
+
+  //  this.winRate = project.winRate;
     this.domains = project.domains;
     this.priority = project.priority;
+
+
+
 
     // Gán giá trị cho relationships mới
     this.projectStatusBidding = project.projectStatusBidding?.toDto();
     this.projectStatusDevelopment = project.projectStatusDevelopment?.toDto();
     this.projectPriority = project.projectPriority?.toDto();
+
+
+
   }
 }

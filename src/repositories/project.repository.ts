@@ -20,6 +20,9 @@ import { FilterProjectDto } from '../modules/projects/dto/requests/filter-projec
 import { default as ContractTypeEntity } from '../entities/contract-type.entity';
 import { default as CustomerEntity } from '../entities/customer.entity';
 import { default as DepartmentEntity } from '../entities/department.entity';
+import { default as ProjectStatusBiddingEntity } from '../entities/project-status-bidding.entity';
+import { default as ProjectStatusDevelopmentEntity } from '../entities/project-status-development.entity';
+import { default as ProjectPriorityEntity } from '../entities/project-priority.entity';
 import { TimeSheetProjectDto } from 'modules/projects/dto/responses/timesheet-project-dto';
 // ✅ Đúng - sử dụng đường dẫn tương đối
 import { TimeSheetProjectOfMemberDto } from '../modules/projects/dto/responses/timesheet-project-member-dto';
@@ -110,15 +113,15 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
 
         if (!isNil(projectFilterOptionsDto.status)) {
           const array = projectFilterOptionsDto.status.split(',');
-          if(projectFilterOptionsDto.projectType === 'Bidding'){
+          if (projectFilterOptionsDto.projectType === 'Bidding') {
             Object.assign(condition, {
-             statusBidding: { [Op.in]: array },
+              statusBidding: { [Op.in]: array },
             });
           }
-          if(projectFilterOptionsDto.projectType === 'Development'){
+          if (projectFilterOptionsDto.projectType === 'Development') {
             Object.assign(condition, {
               statusDevelopment: { [Op.in]: array },
-             });
+            });
           }
         }
 
@@ -142,6 +145,25 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
           paranoid: false,
           attributes: ['id', 'name', 'deletedAt'],
         },
+        {
+          model: ProjectStatusBiddingEntity,
+          as: 'projectStatusBidding',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+        {
+          model: ProjectStatusDevelopmentEntity,
+          as: 'projectStatusDevelopment',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+        {
+          model: ProjectPriorityEntity,
+          as: 'projectPriority',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+
       ],
       limit: projectFilterOptionsDto.take,
       offset: projectFilterOptionsDto.skip,
@@ -190,6 +212,24 @@ export class ProjectRepository implements ProjectNS.IProjectRepository {
         {
           model: CustomerEntity,
           as: 'customer',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+        {
+          model: ProjectStatusBiddingEntity,
+          as: 'projectStatusBidding',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+        {
+          model: ProjectStatusDevelopmentEntity,
+          as: 'projectStatusDevelopment',
+          paranoid: false,
+          attributes: ['id', 'name', 'deletedAt'],
+        },
+        {
+          model: ProjectPriorityEntity,
+          as: 'projectPriority',
           paranoid: false,
           attributes: ['id', 'name', 'deletedAt'],
         },

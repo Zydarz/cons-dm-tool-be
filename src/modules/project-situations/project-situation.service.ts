@@ -214,7 +214,12 @@ export class ProjectSituationService implements IProjectSituationService {
     filter: FilterDto,
   ): Promise<ProjectSituationAllDto[] | PageDto<ProjectSituationFlag>> {
     let projectSituationAll: ProjectSituationAllDto[] | PageDto<ProjectSituationFlag>;
+
+    console.log('filter', filter);
+
+
     if (filter.groupBy === GroupBy.All) {
+         console.log('1111');
       let flags = await this.projectSituationRepository.getFlag(filter, 'all');
       const array = [...new Set(flags)];
       const { page, take } = filter;
@@ -241,16 +246,17 @@ export class ProjectSituationService implements IProjectSituationService {
       );
       projectSituationAll = new PageDto(situationFlag, meta);
     } else {
+             console.log('22222');
+     // filter.status = filter.status ? filter.status : 'all';
       const array = await this.projectSituationRepository.getArrayByGroup(filter);
+      console.log('array', array);
       projectSituationAll = await Promise.all(
         array.map(async (arr) => {
           if (filter.groupBy === GroupBy.PROJECT) {
             const situation = await this.projectSituationRepository.getSituationByProjectId(arr, filter);
             const project = await this.projectService.getProjectbyId(arr);
-
             return new ProjectSituationAllDto(situation.length, situation, undefined, undefined, project);
           }
-
           const month = `${arr?.year}/${arr?.month}`;
           const flags = await this.projectSituationRepository.getFlag(filter, undefined, arr.month, arr.year);
 
