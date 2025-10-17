@@ -13,11 +13,13 @@ import { default as ProjectEntity } from '../entities/project.entity';
 import { GroupBy } from '../common/constants/group-by';
 import { ProjectSituationNS } from '../modules/project-situations/interfaces/project-situation.interface';
 import { ProjectNS } from '../modules/projects/interfaces/project';
-import { isNil, orderBy } from 'lodash';
+import { isNil, orderBy, isEmpty } from 'lodash';
 import ProjectSituationHistoryEntity from '../entities/project-situation-history.entity';
 import { updatedByProjectDto } from '../modules/project-situations/dtos/responses/updated-by-project.response.dto';
 import { projectSituationDetailDto } from '../modules/project-situations/dtos/responses/project-situation-detail.response.dto';
 import { PageMetaDto } from '../common/dto/page-meta.dto';
+import { QueryTypes } from 'sequelize';
+
 
 export class ProjectSituationRepository implements IProjectSituationRepository {
   constructor(
@@ -133,79 +135,164 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
     return projectSituations.map((p) => p.id);
   }
 
+
   async getArrayByGroup(filter: FilterDto) {
+    // ---- PHẦN 1: Chuẩn hóa và xử lý đầu vào ----
+
+    const statuses: number[] = filter.status
+      ? filter.status
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(Number)
+        .filter(isFinite)
+      : [];
+
+    const projectIds: number[] = filter.projectIds
+      ? filter.projectIds
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean)
+        .map(Number)
+        .filter(isFinite)
+      : [];
+
+
+    // ---- PHẦN 2: Xây dựng điều kiện truy vấn một cách linh hoạt ----
+
+    // Điều kiện cho bảng chính (project_situations)
     const condition: WhereOptions = {};
-    let conditionIncludeProject: WhereOptions = {};
-    let include;
     if (filter.startDate && filter.endDate) {
       condition.date = { [Op.between]: [filter.startDate, filter.endDate] };
     }
 
-    if (filter.status !== ProjectNS.Status.ALL) {
-      if (isNil(filter.projectIds)) {
-        conditionIncludeProject = {
-          [Op.and]: {
-            status: filter.status,
-          },
-        }
-      } else {
-        conditionIncludeProject = {
-          [Op.and]: {
-            status: filter.status,
-            id: { [Op.in]: filter.projectIds },
-          },
-        }
-      }
+    // Điều kiện cho bảng ProjectEntity được join vào (include)
+    const conditionIncludeProject: WhereOptions = {};
 
-      include = [
-        {
-          model: ProjectEntity,
-          as: 'project',
-          where: conditionIncludeProject
-          ,
-        },
-      ];
-    } else {
-      if (isNil(filter.projectIds)) {
-        conditionIncludeProject = {}
-      } else {
-        conditionIncludeProject = {
-          [Op.and]: {
-            id: { [Op.in]: filter.projectIds },
-          },
-        }
-      }
-
-      include = [
-        {
-          model: ProjectEntity,
-          as: 'project',
-          where: conditionIncludeProject
-        },
-      ];
+    // Thêm điều kiện projectType nếu có
+    if (filter.projectType) {
+      conditionIncludeProject.type = filter.projectType;
     }
-    let group;
+
+
+    // Thêm điều kiện status nếu có
+    if (!isEmpty(statuses)) {
+      if (filter.projectType === 'Bidding') {
+        conditionIncludeProject.statusBidding = { [Op.in]: statuses };
+      }
+      else if (filter.projectType === 'Development') {
+        conditionIncludeProject.statusDevelopment = { [Op.in]: statuses };
+      }
+    }
+
+    // Thêm điều kiện projectIds nếu có
+    if (!isEmpty(projectIds)) {
+      conditionIncludeProject.id = { [Op.in]: projectIds };
+    }
+
+
+
+    // Cấu trúc include, chỉ cần định nghĩa một lần
+    const include = [
+      {
+        model: ProjectEntity,
+        as: 'project',
+        // Chỉ thêm `where` nếu có điều kiện, tránh việc join bị sai khi không có filter nào
+        ...(!isEmpty(conditionIncludeProject) && { where: conditionIncludeProject }),
+      },
+    ];
+
+
+
+    // ---- PHẦN 3: Thực thi truy vấn dựa trên groupBy ----
+
     if (filter.groupBy === GroupBy.PROJECT) {
-      group = [ProjectSituationNS.Type.PROJECTID];
-      const payment = await this.projectSituationEntity.findAll({
+
+
+      const replacements: { [key: string]: any } = {};
+      const projectWhereClauses: string[] = [];
+      const situationWhereClauses: string[] = [];
+
+      // CHỈ thêm điều kiện khi filter.startDate và filter.endDate có giá trị
+      if (filter.startDate && filter.endDate) {
+        situationWhereClauses.push('`project_situations`.`date` BETWEEN :startDate AND :endDate');
+        replacements.startDate = filter.startDate;
+        replacements.endDate = filter.endDate;
+      }
+
+      // CHỈ thêm điều kiện và replacement khi filter.projectType có giá trị
+      if (filter.projectType) {
+        projectWhereClauses.push('`project`.`type` = :projectType');
+        replacements.projectType = filter.projectType; // Sẽ không bao giờ undefined ở đây
+      }
+
+      // ... (xử lý các filter khác tương tự)
+
+      // Ghép các mảnh query lại
+      const situationWhereString = situationWhereClauses.length > 0 ? `WHERE ${situationWhereClauses.join(' AND ')}` : '';
+      const projectWhereString = projectWhereClauses.length > 0 ? `AND ${projectWhereClauses.join(' AND ')}` : '';
+
+      // Câu query giờ đã linh hoạt, không chứa placeholder thừa
+      const sqlQuery = `
+    SELECT
+        \`project_situations\`.\`projectId\`
+    FROM \`project_situations\`
+    INNER JOIN \`projects\` AS \`project\` 
+        ON \`project_situations\`.\`projectId\` = \`project\`.\`id\` ${projectWhereString}
+    ${situationWhereString}
+    GROUP BY \`project_situations\`.\`projectId\`
+    ORDER BY MAX(\`project_situations\`.\`updatedAt\`) DESC
+`;
+
+      // Thực thi
+      const situations1 = await this.projectSituationEntity.sequelize?.query(sqlQuery, {
+        replacements: replacements, // replacements giờ đã khớp hoàn toàn với sqlQuery
+        type: QueryTypes.SELECT,
+      });
+      console.log('1111111 from raw query:', situations1);
+
+
+      const situations = await this.projectSituationEntity.findAll({
         where: condition,
         attributes: [
           'projectId',
           [sequelize.fn('MAX', sequelize.col('project_situations.updatedAt')), 'latestUpdate'],
         ],
-        include,
+        include: [
+          {
+            model: ProjectEntity,
+            as: 'project',
+            attributes: [],
+            where: conditionIncludeProject,
+            required: true,
+          },
+        ],
         group: ['projectId'],
         order: [[sequelize.literal('latestUpdate'), 'DESC']],
-        raw: true,
+        subQuery: false,
+        logging: console.log,
+
+        // --- BỎ DÒNG NÀY ĐI ---
+        // raw: true, 
       });
 
+      console.log('Raw situations from Sequelize:', situations); // Xem object Sequelize trông thế nào
 
-      const array = payment.map((p) => p.projectId);
+      // Vì không còn là object thô, ta cần dùng .get() hoặc .getDataValue()
+      const array = situations.map((p) => {
+        // In ra để debug
+        console.log(p.get());
+        // Lấy giá trị projectId
+        return p.get('projectId');
+      });
+
+      console.log('array', array);
       return array;
     }
 
-    group = [ProjectSituationNS.Type.MONTH, ProjectSituationNS.Type.YEAR];
-    const payment = await this.projectSituationEntity.findAll({
+    // Mặc định hoặc trường hợp groupBy là 'month'/'year'
+    const group = [ProjectSituationNS.Type.MONTH, ProjectSituationNS.Type.YEAR];
+    const situations = await this.projectSituationEntity.findAll({
       where: condition,
       attributes: [
         [sequelize.fn('MONTH', sequelize.col('date')), ProjectSituationNS.Type.MONTH],
@@ -215,7 +302,8 @@ export class ProjectSituationRepository implements IProjectSituationRepository {
       group,
       order: [['updatedAt', 'DESC']],
     });
-    const array = payment.map((p) => ({
+
+    const array = situations.map((p) => ({
       month: p.getDataValue(ProjectSituationNS.Type.MONTH),
       year: p.getDataValue(ProjectSituationNS.Type.YEAR),
     }));

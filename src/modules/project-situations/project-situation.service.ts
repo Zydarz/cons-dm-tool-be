@@ -219,7 +219,7 @@ export class ProjectSituationService implements IProjectSituationService {
 
 
     if (filter.groupBy === GroupBy.All) {
-         console.log('1111');
+      console.log('1111');
       let flags = await this.projectSituationRepository.getFlag(filter, 'all');
       const array = [...new Set(flags)];
       const { page, take } = filter;
@@ -246,10 +246,9 @@ export class ProjectSituationService implements IProjectSituationService {
       );
       projectSituationAll = new PageDto(situationFlag, meta);
     } else {
-             console.log('22222');
-     // filter.status = filter.status ? filter.status : 'all';
+      console.log('22222');
+      // filter.status = filter.status ? filter.status : 'all';
       const array = await this.projectSituationRepository.getArrayByGroup(filter);
-      console.log('array', array);
       projectSituationAll = await Promise.all(
         array.map(async (arr) => {
           if (filter.groupBy === GroupBy.PROJECT) {
